@@ -112,15 +112,15 @@ export default function DocumentUpload({
       // Simulate upload progress
       const progressInterval = setInterval(() => {
         setUploadProgress((prev) => {
-          if (prev >= 90) {
+          if (prev >= 70) {
             clearInterval(progressInterval);
-            return 90;
+            return 70;
           }
           return prev + 10;
         });
-      }, 200);
+      }, 300);
 
-      // Upload document to database
+      // Upload document to storage and database
       const document = await uploadDocument(
         user.id,
         file,
@@ -129,6 +129,7 @@ export default function DocumentUpload({
         wordCount,
       );
 
+      clearInterval(progressInterval);
       setUploadProgress(100);
       setUploadStatus("success");
 

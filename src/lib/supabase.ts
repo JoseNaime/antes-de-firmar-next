@@ -45,6 +45,7 @@ export type Database = {
           content: string;
           file_type: string;
           file_size: number;
+          file_url: string | null;
           page_count: number;
           word_count: number;
           tokens_used: number;
@@ -59,6 +60,7 @@ export type Database = {
           content: string;
           file_type: string;
           file_size: number;
+          file_url?: string | null;
           page_count?: number;
           word_count?: number;
           tokens_used?: number;
@@ -73,6 +75,7 @@ export type Database = {
           content?: string;
           file_type?: string;
           file_size?: number;
+          file_url?: string | null;
           page_count?: number;
           word_count?: number;
           tokens_used?: number;

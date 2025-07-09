@@ -30,6 +30,22 @@ export const uploadDocument = async (
       );
     }
 
+    // Upload file to Supabase Storage
+    const fileExtension = file.name.split(".").pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExtension}`;
+    const filePath = `${userId}/${fileName}`;
+
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from("users-documents")
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    // Get the public URL for the uploaded file
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("users-documents").getPublicUrl(filePath);
+
     // Create document record
     const { data: documentData, error: documentError } = await supabase
       .from("documents")
@@ -39,6 +55,7 @@ export const uploadDocument = async (
         content,
         file_type: file.type,
         file_size: file.size,
+        file_url: publicUrl,
         page_count: pageCount,
         word_count: wordCount,
         tokens_used: tokensRequired,
@@ -47,7 +64,11 @@ export const uploadDocument = async (
       .select()
       .single();
 
-    if (documentError) throw documentError;
+    if (documentError) {
+      // If document creation fails, clean up the uploaded file
+      await supabase.storage.from("users-documents").remove([filePath]);
+      throw documentError;
+    }
 
     // Deduct tokens from user
     const { error: tokenError } = await supabase
@@ -197,6 +218,51 @@ export const simulateAIAnalysis = async (
   };
 
   return await createAIReview(documentId, mockReview);
+};
+
+export const deleteDocument = async (documentId: string, userId: string) => {
+  try {
+    // Get document details first
+    const { data: document, error: fetchError } = await supabase
+      .from("documents")
+      .select("file_url, user_id")
+      .eq("id", documentId)
+      .eq("user_id", userId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    // Delete AI reviews first (due to foreign key constraint)
+    const { error: reviewsError } = await supabase
+      .from("ai_reviews")
+      .delete()
+      .eq("document_id", documentId);
+
+    if (reviewsError) throw reviewsError;
+
+    // Delete document record
+    const { error: documentError } = await supabase
+      .from("documents")
+      .delete()
+      .eq("id", documentId)
+      .eq("user_id", userId);
+
+    if (documentError) throw documentError;
+
+    // Delete file from storage if it exists
+    if (document.file_url) {
+      // Extract the file path from the URL
+      const urlParts = document.file_url.split("/");
+      const fileName = urlParts[urlParts.length - 1];
+      const filePath = `${userId}/${fileName}`;
+      await supabase.storage.from("users-documents").remove([filePath]);
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Delete document error:", error);
+    throw error;
+  }
 };
 
 export const extractTextFromFile = async (
