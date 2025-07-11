@@ -32,11 +32,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const refreshUser = async () => {
     try {
-      const currentUser = await getCurrentUser();
-      setUser(currentUser);
+      console.log("Starting getCurrentUser method");
+
+      // Get auth user first
+      const {
+        data: { user: authUser },
+        error: authError,
+      } = await supabase.auth.getUser();
+      console.log("Auth user:", authUser?.id, "Auth error:", authError);
+
+      if (authError) {
+        console.error("Auth error:", authError);
+        setUser(null);
+        return;
+      }
+
+      if (!authUser) {
+        console.log("No auth user found");
+        setUser(null);
+        return;
+      }
+
+      // Get user profile from database
+      console.log("Fetching user profile for ID:", authUser.id);
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", authUser.id)
+        .single();
+
+      console.log("User data:", userData, "User error:", userError);
+
+      if (userError) {
+        console.error("User profile error:", userError);
+        setUser(null);
+        return;
+      }
+
+      console.log("Setting user:", userData);
+      setUser(userData);
     } catch (error) {
       console.error("Error refreshing user:", error);
       setUser(null);
+    } finally {
+      console.log("Setting loading to false");
+      setLoading(false);
     }
   };
 
@@ -50,34 +90,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   useEffect(() => {
-    // Get initial session
-    const getInitialSession = async () => {
-      try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        if (session?.user) {
-          await refreshUser();
-        }
-      } catch (error) {
-        console.error("Error getting initial session:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getInitialSession();
-
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN" && session?.user) {
+      console.log("Auth state change:", event, session?.user?.id);
+
+      if (event === "INITIAL_SESSION") {
+        if (session?.user) {
+          console.log("Initial session found, refreshing user");
+          await refreshUser();
+        } else {
+          console.log("No initial session found");
+          setUser(null);
+          setLoading(false);
+        }
+      } else if (event === "SIGNED_IN" && session?.user) {
+        console.log("User signed in, refreshing user");
         await refreshUser();
-      } else if (event === "SIGNED_OUT") {
+      } else if (event === "SIGNED_OUT" || !session) {
+        console.log("User signed out or no session");
         setUser(null);
+        setLoading(false);
+      } else if (event === "TOKEN_REFRESHED" && session?.user) {
+        console.log("Token refreshed, refreshing user");
+        await refreshUser();
       }
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
