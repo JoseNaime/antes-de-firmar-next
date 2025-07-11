@@ -127,9 +127,21 @@ export const getCurrentUser = async (): Promise<User | null> => {
 
 export const updateUserTokens = async (userId: string, tokensUsed: number) => {
   try {
+    // Fetch current tokens
+    const { data: user, error: fetchError } = await supabase
+      .from("users")
+      .select("tokens")
+      .eq("id", userId)
+      .single();
+
+    if (fetchError) throw fetchError;
+    if (!user) throw new Error("User not found");
+
+    const newTokens = Math.max(0, (user.tokens || 0) - tokensUsed);
+
     const { data, error } = await supabase
       .from("users")
-      .update({ tokens: supabase.raw(`tokens - ${tokensUsed}`) })
+      .update({ tokens: newTokens })
       .eq("id", userId)
       .select()
       .single();

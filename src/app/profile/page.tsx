@@ -139,13 +139,21 @@ export default function ProfilePage() {
     setMessage(null);
 
     try {
+      // Get all document IDs for this user
+      const { data: documentIds, error: fetchError } = await supabase
+        .from("documents")
+        .select("id")
+        .eq("user_id", user.id);
+
+      if (fetchError) throw fetchError;
+
       // Delete all AI reviews first (due to foreign key constraint)
       const { error: reviewsError } = await supabase
         .from("ai_reviews")
         .delete()
         .in(
           "document_id",
-          supabase.from("documents").select("id").eq("user_id", user.id),
+          documentIds?.map(doc => doc.id) || []
         );
 
       if (reviewsError) throw reviewsError;

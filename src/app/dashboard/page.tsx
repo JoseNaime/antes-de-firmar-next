@@ -98,17 +98,10 @@ export default function Dashboard() {
     return null;
   }
 
-  const handleUploadComplete = (file: File) => {
-    // Simulate adding a new document to the list
-    const newDocument: Document = {
-      id: Date.now().toString(),
-      name: file.name,
-      date: new Date().toISOString().split("T")[0],
-      status: "good", // This would come from actual analysis
-    };
-    setDocuments((prev) => [newDocument, ...prev]);
+  const handleUploadComplete = (documentId: string) => {
+    // Switch to analysis view
     setActiveView("analysis");
-    setSelectedDocumentId(newDocument.id);
+    setSelectedDocumentId(documentId);
   };
 
   const handleSelectDocument = (documentId: string) => {
