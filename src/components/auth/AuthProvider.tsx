@@ -32,44 +32,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const refreshUser = async () => {
     try {
-      console.log("Starting getCurrentUser method");
-
-      // Get auth user first
-      const {
-        data: { user: authUser },
-        error: authError,
-      } = await supabase.auth.getUser();
-      console.log("Auth user:", authUser?.id, "Auth error:", authError);
-
-      if (authError) {
-        console.error("Auth error:", authError);
-        setUser(null);
-        return;
-      }
-
-      if (!authUser) {
-        console.log("No auth user found");
-        setUser(null);
-        return;
-      }
-
-      // Get user profile from database
-      console.log("Fetching user profile for ID:", authUser.id);
-      const { data: userData, error: userError } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", authUser.id)
-        .single();
-
-      console.log("User data:", userData, "User error:", userError);
-
-      if (userError) {
-        console.error("User profile error:", userError);
-        setUser(null);
-        return;
-      }
-
-      console.log("Setting user:", userData);
+      console.log("Starting refreshUser method");
+      const userData = await getCurrentUser();
+      console.log("User data from getCurrentUser:", userData);
       setUser(userData);
     } catch (error) {
       console.error("Error refreshing user:", error);
@@ -90,22 +55,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   useEffect(() => {
+    // Initial load
+    refreshUser();
+
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state change:", event, session?.user?.id);
 
-      if (event === "INITIAL_SESSION") {
-        if (session?.user) {
-          console.log("Initial session found, refreshing user");
-          await refreshUser();
-        } else {
-          console.log("No initial session found");
-          setUser(null);
-          setLoading(false);
-        }
-      } else if (event === "SIGNED_IN" && session?.user) {
+      if (event === "SIGNED_IN" && session?.user) {
         console.log("User signed in, refreshing user");
         await refreshUser();
       } else if (event === "SIGNED_OUT" || !session) {

@@ -104,20 +104,33 @@ export const signOut = async () => {
 
 export const getCurrentUser = async (): Promise<User | null> => {
   try {
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
+    // Get the current session first
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError) {
+      console.error("Session error:", sessionError);
+      return null;
+    }
 
-    if (!authUser) return null;
+    if (!session?.user) {
+      console.log("No active session found");
+      return null;
+    }
 
-    const { data: userData, error } = await supabase
+    console.log("Fetching user profile for:", session.user.id);
+
+    const { data: userData, error: userError } = await supabase
       .from("users")
       .select("*")
-      .eq("id", authUser.id)
+      .eq("id", session.user.id)
       .single();
 
-    if (error) throw error;
+    if (userError) {
+      console.error("User profile error:", userError);
+      return null;
+    }
 
+    console.log("User profile loaded:", userData?.name);
     return userData;
   } catch (error) {
     console.error("Get current user error:", error);
