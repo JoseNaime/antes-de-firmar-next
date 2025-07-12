@@ -69,6 +69,7 @@ export default function ProfilePage() {
       if (user) {
         // Check if user signed up with OAuth provider
         const { data: authUser } = await supabase.auth.getUser();
+        console.log("Auth user:", authUser);
         if (
           authUser.user?.app_metadata?.provider &&
           authUser.user.app_metadata.provider !== "email"
