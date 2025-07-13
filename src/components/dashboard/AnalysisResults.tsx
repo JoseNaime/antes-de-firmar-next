@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -12,9 +12,13 @@ import {
   AlertTriangle,
   FileText,
   Download,
+  ThumbsUp,
+  ThumbsDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DocumentHistory from "./DocumentHistory";
+import { submitFeedback, getFeedback } from "@/lib/documents";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 interface AnalysisResultsProps {
   document?: {
@@ -24,6 +28,7 @@ interface AnalysisResultsProps {
     status: "completed" | "processing" | "error";
   };
   analysis?: {
+    id?: string;
     summary: string;
     goodClauses: Array<{ id: string; text: string; explanation: string }>;
     concerningClauses: Array<{ id: string; text: string; explanation: string }>;
@@ -40,7 +45,42 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({
   document,
   analysis,
 }) => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("summary");
+  const [currentFeedback, setCurrentFeedback] = useState<
+    "thumbs_up" | "thumbs_down" | null
+  >(null);
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+
+  // Load existing feedback when component mounts or analysis changes
+  useEffect(() => {
+    const loadFeedback = async () => {
+      if (!user || !analysis?.id) return;
+
+      try {
+        const feedback = await getFeedback(user.id, analysis.id);
+        setCurrentFeedback(feedback?.feedback_type || null);
+      } catch (error) {
+        console.error("Error loading feedback:", error);
+      }
+    };
+
+    loadFeedback();
+  }, [user, analysis?.id]);
+
+  const handleFeedback = async (feedbackType: "thumbs_up" | "thumbs_down") => {
+    if (!user || !document || !analysis?.id) return;
+
+    setIsSubmittingFeedback(true);
+    try {
+      await submitFeedback(user.id, document.id, analysis.id, feedbackType);
+      setCurrentFeedback(feedbackType);
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+    } finally {
+      setIsSubmittingFeedback(false);
+    }
+  };
 
   // If no document is provided, show placeholder state
   if (!document) {
@@ -110,10 +150,52 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({
                   Uploaded on {document.uploadDate}
                 </p>
               </div>
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Download Report
-              </Button>
+              <div className="flex items-center gap-2">
+                {/* Feedback buttons */}
+                {analysis?.id && (
+                  <div className="flex items-center gap-1 mr-4">
+                    <span className="text-sm text-muted-foreground mr-2">
+                      Rate this analysis:
+                    </span>
+                    <Button
+                      variant={
+                        currentFeedback === "thumbs_up" ? "default" : "outline"
+                      }
+                      size="sm"
+                      onClick={() => handleFeedback("thumbs_up")}
+                      disabled={isSubmittingFeedback}
+                      className={
+                        currentFeedback === "thumbs_up"
+                          ? "bg-green-600 hover:bg-green-700"
+                          : ""
+                      }
+                    >
+                      <ThumbsUp className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant={
+                        currentFeedback === "thumbs_down"
+                          ? "default"
+                          : "outline"
+                      }
+                      size="sm"
+                      onClick={() => handleFeedback("thumbs_down")}
+                      disabled={isSubmittingFeedback}
+                      className={
+                        currentFeedback === "thumbs_down"
+                          ? "bg-red-600 hover:bg-red-700"
+                          : ""
+                      }
+                    >
+                      <ThumbsDown className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+                <Button variant="outline" size="sm">
+                  <Download className="h-4 w-4 mr-2" />
+                  Download Report
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>

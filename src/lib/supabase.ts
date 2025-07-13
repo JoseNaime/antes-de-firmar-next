@@ -122,6 +122,35 @@ export type Database = {
           updated_at?: string;
         };
       };
+      feedback: {
+        Row: {
+          id: string;
+          user_id: string;
+          document_id: string;
+          ai_review_id: string;
+          feedback_type: "thumbs_up" | "thumbs_down";
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          document_id: string;
+          ai_review_id: string;
+          feedback_type: "thumbs_up" | "thumbs_down";
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          document_id?: string;
+          ai_review_id?: string;
+          feedback_type?: "thumbs_up" | "thumbs_down";
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
   };
 };

@@ -1,5 +1,6 @@
 import { supabase } from "./supabase";
 import { calculateTokensRequired } from "./auth";
+import type { Database } from "./supabase";
 
 type Document = Database["public"]["Tables"]["documents"]["Row"];
 type AIReview = Database["public"]["Tables"]["ai_reviews"]["Row"];
@@ -300,4 +301,61 @@ export const extractTextFromFile = async (
       resolve({ content: mockContent, pageCount, wordCount });
     }
   });
+};
+
+// Feedback functions
+export const submitFeedback = async (
+  userId: string,
+  documentId: string,
+  aiReviewId: string,
+  feedbackType: "thumbs_up" | "thumbs_down",
+) => {
+  try {
+    const { data, error } = await supabase
+      .from("feedback")
+      .upsert(
+        {
+          user_id: userId,
+          document_id: documentId,
+          ai_review_id: aiReviewId,
+          feedback_type: feedbackType,
+          updated_at: new Date().toISOString(),
+        },
+        {
+          onConflict: "user_id,ai_review_id",
+        },
+      )
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Submit feedback error:", error);
+    throw error;
+  }
+};
+
+export const getFeedback = async (
+  userId: string,
+  aiReviewId: string,
+): Promise<Database["public"]["Tables"]["feedback"]["Row"] | null> => {
+  try {
+    const { data, error } = await supabase
+      .from("feedback")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("ai_review_id", aiReviewId)
+      .single();
+
+    if (error && error.code !== "PGRST116") {
+      // PGRST116 is "not found" error, which is expected when no feedback exists
+      throw error;
+    }
+
+    return data || null;
+  } catch (error) {
+    console.error("Get feedback error:", error);
+    throw error;
+  }
 };

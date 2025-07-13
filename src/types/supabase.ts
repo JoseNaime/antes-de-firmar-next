@@ -67,6 +67,7 @@ export type Database = {
           created_at: string | null
           file_size: number
           file_type: string
+          file_url: string | null
           id: string
           name: string
           page_count: number | null
@@ -81,6 +82,7 @@ export type Database = {
           created_at?: string | null
           file_size: number
           file_type: string
+          file_url?: string | null
           id?: string
           name: string
           page_count?: number | null
@@ -95,6 +97,7 @@ export type Database = {
           created_at?: string | null
           file_size?: number
           file_type?: string
+          file_url?: string | null
           id?: string
           name?: string
           page_count?: number | null
@@ -107,6 +110,58 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "documents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback: {
+        Row: {
+          ai_review_id: string
+          created_at: string | null
+          document_id: string
+          feedback_type: string
+          id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          ai_review_id: string
+          created_at?: string | null
+          document_id: string
+          feedback_type: string
+          id?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          ai_review_id?: string
+          created_at?: string | null
+          document_id?: string
+          feedback_type?: string
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_ai_review_id_fkey"
+            columns: ["ai_review_id"]
+            isOneToOne: false
+            referencedRelation: "ai_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"

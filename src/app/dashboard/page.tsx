@@ -378,6 +378,7 @@ export default function Dashboard() {
                     analysis={
                       selectedDocument.ai_reviews?.[0]
                         ? {
+                            id: selectedDocument.ai_reviews[0].id,
                             summary:
                               selectedDocument.ai_reviews[0].summary || "",
                             goodClauses:
