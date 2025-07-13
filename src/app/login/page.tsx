@@ -1,14 +1,34 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import LoginForm from "@/components/auth/LoginForm";
-import { signIn, signInWithGoogle } from "@/lib/auth";
+import { signIn, signInWithGoogle, getCurrentUser } from "@/lib/auth";
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const router = useRouter();
+
+  // Check if user is already authenticated
+  useEffect(() => {
+    const checkAuthentication = async () => {
+      try {
+        const user = await getCurrentUser();
+        if (user) {
+          router.replace("/dashboard");
+          return;
+        }
+      } catch (error) {
+        console.error("Error checking authentication:", error);
+      } finally {
+        setCheckingAuth(false);
+      }
+    };
+
+    checkAuthentication();
+  }, [router]);
 
   const handleLogin = async (email: string, password: string) => {
     setIsLoading(true);
@@ -39,6 +59,19 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
+
+  // Show loading while checking authentication
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-pulse flex flex-col items-center">
+          <div className="h-16 w-16 rounded-full bg-muted mb-4"></div>
+          <div className="h-6 w-48 bg-muted rounded mb-4"></div>
+          <div className="h-4 w-64 bg-muted rounded"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <LoginForm

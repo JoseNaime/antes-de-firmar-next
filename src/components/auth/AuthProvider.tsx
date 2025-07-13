@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { getCurrentUser } from "@/lib/auth";
 import type { Database } from "@/lib/supabase";
 
 type User = Database["public"]["Tables"]["users"]["Row"];
@@ -29,8 +28,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
+
+  const getCurrentUser = async (): Promise<User | null> => {
+    try {
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (sessionError) {
+        console.error("Session error:", sessionError);
+        return null;
+      }
+
+      if (!session?.user) {
+        console.log("No active session found");
+        return null;
+      }
+
+      console.log("Fetching user profile for:", session.user.id);
+
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", session.user.id)
+        .single();
+
+      if (userError) {
+        console.error("User profile error:", userError);
+        return null;
+      }
+
+      console.log("User profile loaded:", userData?.name);
+      return userData;
+    } catch (error) {
+      console.error("Get current user error:", error);
+      return null;
+    }
+  };
 
   const refreshUser = async () => {
+    if (!isClient) return;
+
     try {
       console.log("Starting refreshUser method");
       const userData = await getCurrentUser();
@@ -40,7 +80,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error("Error refreshing user:", error);
       setUser(null);
     } finally {
-      console.log("Setting loading to false");
       setLoading(false);
     }
   };
@@ -55,7 +94,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   useEffect(() => {
-    // Initial load
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
+
+    // Initialize auth state
     refreshUser();
 
     // Listen for auth changes
@@ -66,6 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (event === "SIGNED_IN" && session?.user) {
         console.log("User signed in, refreshing user");
+        setLoading(true);
         await refreshUser();
       } else if (event === "SIGNED_OUT" || !session) {
         console.log("User signed out or no session");
@@ -73,12 +119,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setLoading(false);
       } else if (event === "TOKEN_REFRESHED" && session?.user) {
         console.log("Token refreshed, refreshing user");
+        setLoading(true);
         await refreshUser();
       }
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [isClient]);
 
   const value = {
     user,
