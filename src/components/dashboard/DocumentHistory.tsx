@@ -274,9 +274,9 @@ const DocumentHistory = ({
           </Dialog>
         </div>
       </CardHeader>
-      <CardContent className="p-0">
-        <ScrollArea className="h-[500px] pr-4">
-          <div className="space-y-2 px-4 pb-4">
+      <CardContent className="p-4 pt-0">
+        <ScrollArea className="h-[400px]">
+          <div className="space-y-2 pr-4">
             {documents.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <File className="h-12 w-12 mx-auto mb-2 opacity-30" />
@@ -287,22 +287,24 @@ const DocumentHistory = ({
                 <Button
                   key={document.id}
                   variant="outline"
-                  className={`w-full justify-start text-left h-auto py-3 px-4 ${selectedDocumentId === document.id ? "border-primary bg-primary/5" : "border-gray-200"}`}
+                  className={`w-full justify-start text-left h-auto py-2 px-3 ${selectedDocumentId === document.id ? "border-primary bg-primary/5" : "border-gray-200"}`}
                   onClick={() => handleSelectDocument(document.id)}
                 >
-                  <div className="flex flex-col w-full gap-1">
-                    <div className="flex items-center gap-2">
+                  <div className="flex flex-col w-full gap-1 min-w-0">
+                    <div className="flex items-center gap-2 min-w-0">
                       {getStatusIcon(document.status)}
-                      <span className="font-medium truncate">
+                      <span className="font-medium truncate flex-1">
                         {document.name}
                       </span>
                     </div>
                     <div className="flex items-center justify-between w-full text-xs text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />{" "}
+                      <span className="flex items-center gap-1 truncate">
+                        <Clock className="h-3 w-3 flex-shrink-0" />{" "}
                         {formatDate(document.date)}
                       </span>
-                      {getStatusBadge(document.status)}
+                      <div className="flex-shrink-0 ml-2">
+                        {getStatusBadge(document.status)}
+                      </div>
                     </div>
                   </div>
                 </Button>
