@@ -132,19 +132,29 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground">
-                Welcome, {user.name}
-              </span>
-              <Link href="/profile">
-                <Button variant="outline" size="sm">
-                  <User className="h-4 w-4 mr-2" />
-                  Profile
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-muted-foreground">
+                  Welcome, {user.name}
+                </span>
+                <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full">
+                  <div className="h-2 w-2 rounded-full bg-primary"></div>
+                  <span className="text-sm font-medium text-primary">
+                    {user.tokens || 0} tokens
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Link href="/profile">
+                  <Button variant="outline" size="sm">
+                    <User className="h-4 w-4 mr-2" />
+                    Profile
+                  </Button>
+                </Link>
+                <Button variant="outline" size="sm" onClick={handleSignOut}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
                 </Button>
-              </Link>
-              <Button variant="outline" size="sm" onClick={handleSignOut}>
-                <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
-              </Button>
+              </div>
             </div>
           </div>
         </div>
