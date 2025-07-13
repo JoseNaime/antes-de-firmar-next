@@ -1,5 +1,4 @@
-import { createSupabaseClient } from "./supabase";
-import type { Database } from "./supabase";
+import { supabase } from "./supabase";
 import { calculateTokensRequired } from "./auth";
 
 type Document = Database["public"]["Tables"]["documents"]["Row"];
@@ -13,7 +12,6 @@ export const uploadDocument = async (
   wordCount: number,
 ) => {
   try {
-    const supabase = createSupabaseClient();
     const tokensRequired = calculateTokensRequired(pageCount, wordCount);
 
     // Check if user has enough tokens
@@ -88,7 +86,6 @@ export const uploadDocument = async (
 
 export const getUserDocuments = async (userId: string) => {
   try {
-    const supabase = createSupabaseClient();
     const { data, error } = await supabase
       .from("documents")
       .select(
@@ -114,7 +111,6 @@ export const getDocumentWithReview = async (
   userId: string,
 ) => {
   try {
-    const supabase = createSupabaseClient();
     const { data, error } = await supabase
       .from("documents")
       .select(
@@ -148,7 +144,6 @@ export const createAIReview = async (
   },
 ) => {
   try {
-    const supabase = createSupabaseClient();
     const { data, error } = await supabase
       .from("ai_reviews")
       .insert({
@@ -226,8 +221,6 @@ export const simulateAIAnalysis = async (
 
 export const deleteDocument = async (documentId: string, userId: string) => {
   try {
-    const supabase = createSupabaseClient();
-
     // Get document details first
     const { data: document, error: fetchError } = await supabase
       .from("documents")
