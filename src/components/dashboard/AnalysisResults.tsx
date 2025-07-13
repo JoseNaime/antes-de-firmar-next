@@ -37,63 +37,8 @@ interface AnalysisResultsProps {
 }
 
 const AnalysisResults: React.FC<AnalysisResultsProps> = ({
-  document = {
-    id: "doc-123",
-    name: "Rental Agreement.pdf",
-    uploadDate: "2023-05-15",
-    status: "completed",
-  },
-  analysis = {
-    summary:
-      "This rental agreement contains several standard clauses but has a few concerning elements and some problematic clauses that should be addressed before signing.",
-    goodClauses: [
-      {
-        id: "g1",
-        text: "Tenant shall pay rent on the 1st of each month",
-        explanation: "Standard payment term with clear due date",
-      },
-      {
-        id: "g2",
-        text: "Landlord will maintain all structural elements of the property",
-        explanation:
-          "Properly assigns maintenance responsibilities to landlord",
-      },
-      {
-        id: "g3",
-        text: "Security deposit to be returned within 30 days of move-out",
-        explanation:
-          "Complies with standard legal timeframes for deposit returns",
-      },
-    ],
-    concerningClauses: [
-      {
-        id: "c1",
-        text: "Tenant responsible for all appliance repairs regardless of cause",
-        explanation: "Shifts excessive maintenance burden to tenant",
-      },
-      {
-        id: "c2",
-        text: "Late fees of $50 per day for any late payment",
-        explanation: "Late fee amount may be considered excessive",
-      },
-    ],
-    problematicClauses: [
-      {
-        id: "p1",
-        text: "Landlord may enter premises at any time without notice",
-        explanation:
-          "Violates tenant right to privacy and notice requirements in most jurisdictions",
-      },
-      {
-        id: "p2",
-        text: "Tenant waives all rights to security deposit return if lease terminated early for any reason",
-        explanation:
-          "Likely unenforceable penalty clause that contradicts security deposit laws",
-      },
-    ],
-    legalImplications:
-      "The problematic clauses in this agreement could expose you to privacy violations and potentially illegal withholding of your security deposit. The concerning clauses create financial risk through excessive repair responsibilities and punitive late fees.",
-  },
+  document,
+  analysis,
 }) => {
   const [activeTab, setActiveTab] = useState("summary");
 
@@ -106,6 +51,20 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({
         <p className="text-muted-foreground text-center max-w-md">
           Upload a document or select one from your history to see analysis
           results.
+        </p>
+      </div>
+    );
+  }
+
+  // If no analysis is available, show message
+  if (!analysis) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[600px] bg-background">
+        <AlertCircle className="h-16 w-16 text-muted-foreground mb-4" />
+        <h3 className="text-xl font-medium mb-2">No Analysis Available</h3>
+        <p className="text-muted-foreground text-center max-w-md">
+          This document hasn't been analyzed yet or the analysis is still
+          processing.
         </p>
       </div>
     );

@@ -21,6 +21,12 @@ import DocumentUpload from "@/components/dashboard/DocumentUpload";
 import DocumentHistory from "@/components/dashboard/DocumentHistory";
 import AnalysisResults from "@/components/dashboard/AnalysisResults";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { getUserDocuments, getDocumentWithReview } from "@/lib/documents";
+import type { Database } from "@/lib/supabase";
+
+type DocumentWithReview = Database["public"]["Tables"]["documents"]["Row"] & {
+  ai_reviews: Database["public"]["Tables"]["ai_reviews"]["Row"][];
+};
 
 interface Document {
   id: string;
@@ -36,6 +42,10 @@ export default function Dashboard() {
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
     null,
   );
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [selectedDocument, setSelectedDocument] =
+    useState<DocumentWithReview | null>(null);
+  const [loadingDocuments, setLoadingDocuments] = useState(false);
 
   useEffect(() => {
     console.log(loading, user);
@@ -44,38 +54,36 @@ export default function Dashboard() {
     }
   }, [user, loading, router]);
 
-  const [documents, setDocuments] = useState<Document[]>([
-    {
-      id: "1",
-      name: "Rental Agreement.pdf",
-      date: "2023-05-15",
-      status: "good",
-    },
-    {
-      id: "2",
-      name: "Employment Contract.pdf",
-      date: "2023-04-22",
-      status: "concerning",
-    },
-    {
-      id: "3",
-      name: "NDA Document.pdf",
-      date: "2023-03-10",
-      status: "problematic",
-    },
-    {
-      id: "4",
-      name: "Service Agreement.pdf",
-      date: "2023-02-28",
-      status: "good",
-    },
-    {
-      id: "5",
-      name: "Loan Terms.pdf",
-      date: "2023-01-15",
-      status: "concerning",
-    },
-  ]);
+  // Fetch user documents
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      if (!user) return;
+
+      setLoadingDocuments(true);
+      try {
+        const userDocuments = await getUserDocuments(user.id);
+
+        // Transform documents to match the expected format
+        const transformedDocuments: Document[] = userDocuments.map((doc) => {
+          const review = doc.ai_reviews?.[0];
+          return {
+            id: doc.id,
+            name: doc.name,
+            date: new Date(doc.created_at).toISOString().split("T")[0],
+            status: review?.overall_status || "good",
+          };
+        });
+
+        setDocuments(transformedDocuments);
+      } catch (error) {
+        console.error("Error fetching documents:", error);
+      } finally {
+        setLoadingDocuments(false);
+      }
+    };
+
+    fetchDocuments();
+  }, [user]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -98,15 +106,52 @@ export default function Dashboard() {
     return null;
   }
 
-  const handleUploadComplete = (documentId: string) => {
-    // Switch to analysis view
-    setActiveView("analysis");
-    setSelectedDocumentId(documentId);
+  const handleUploadComplete = async (documentId: string) => {
+    // Refresh documents list
+    if (user) {
+      try {
+        const userDocuments = await getUserDocuments(user.id);
+        const transformedDocuments: Document[] = userDocuments.map((doc) => {
+          const review = doc.ai_reviews?.[0];
+          return {
+            id: doc.id,
+            name: doc.name,
+            date: new Date(doc.created_at).toISOString().split("T")[0],
+            status: review?.overall_status || "good",
+          };
+        });
+        setDocuments(transformedDocuments);
+
+        // Switch to analysis view and load the new document
+        setActiveView("analysis");
+        setSelectedDocumentId(documentId);
+
+        const documentWithReview = await getDocumentWithReview(
+          documentId,
+          user.id,
+        );
+        setSelectedDocument(documentWithReview);
+      } catch (error) {
+        console.error("Error refreshing documents:", error);
+      }
+    }
   };
 
-  const handleSelectDocument = (documentId: string) => {
+  const handleSelectDocument = async (documentId: string) => {
+    if (!user) return;
+
     setSelectedDocumentId(documentId);
     setActiveView("analysis");
+
+    try {
+      const documentWithReview = await getDocumentWithReview(
+        documentId,
+        user.id,
+      );
+      setSelectedDocument(documentWithReview);
+    } catch (error) {
+      console.error("Error fetching document with review:", error);
+    }
   };
 
   const getStatusCounts = () => {
@@ -260,6 +305,45 @@ export default function Dashboard() {
             <DocumentHistory
               documents={documents}
               onSelectDocument={handleSelectDocument}
+              onDocumentDeleted={async () => {
+                // Refresh documents list after deletion
+                if (user) {
+                  try {
+                    const userDocuments = await getUserDocuments(user.id);
+                    const transformedDocuments: Document[] = userDocuments.map(
+                      (doc) => {
+                        const review = doc.ai_reviews?.[0];
+                        return {
+                          id: doc.id,
+                          name: doc.name,
+                          date: new Date(doc.created_at)
+                            .toISOString()
+                            .split("T")[0],
+                          status: review?.overall_status || "good",
+                        };
+                      },
+                    );
+                    setDocuments(transformedDocuments);
+
+                    // Clear selected document if it was deleted
+                    if (
+                      selectedDocumentId &&
+                      !transformedDocuments.find(
+                        (doc) => doc.id === selectedDocumentId,
+                      )
+                    ) {
+                      setSelectedDocumentId(null);
+                      setSelectedDocument(null);
+                    }
+                  } catch (error) {
+                    console.error(
+                      "Error refreshing documents after deletion:",
+                      error,
+                    );
+                  }
+                }
+              }}
+              userId={user?.id}
             />
           </div>
 
@@ -279,18 +363,40 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="space-y-6">
-                {selectedDocumentId ? (
+                {selectedDocumentId && selectedDocument ? (
                   <AnalysisResults
                     document={{
-                      id: selectedDocumentId,
-                      name:
-                        documents.find((d) => d.id === selectedDocumentId)
-                          ?.name || "Unknown Document",
-                      uploadDate:
-                        documents.find((d) => d.id === selectedDocumentId)
-                          ?.date || "Unknown Date",
-                      status: "completed",
+                      id: selectedDocument.id,
+                      name: selectedDocument.name,
+                      uploadDate: new Date(
+                        selectedDocument.created_at,
+                      ).toLocaleDateString(),
+                      status:
+                        selectedDocument.status === "completed"
+                          ? "completed"
+                          : selectedDocument.status === "processing"
+                            ? "processing"
+                            : "error",
                     }}
+                    analysis={
+                      selectedDocument.ai_reviews?.[0]
+                        ? {
+                            summary:
+                              selectedDocument.ai_reviews[0].summary || "",
+                            goodClauses:
+                              selectedDocument.ai_reviews[0].good_clauses || [],
+                            concerningClauses:
+                              selectedDocument.ai_reviews[0]
+                                .concerning_clauses || [],
+                            problematicClauses:
+                              selectedDocument.ai_reviews[0]
+                                .problematic_clauses || [],
+                            legalImplications:
+                              selectedDocument.ai_reviews[0]
+                                .legal_implications || "",
+                          }
+                        : undefined
+                    }
                   />
                 ) : (
                   <Card className="bg-white">
