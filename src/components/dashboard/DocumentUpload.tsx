@@ -38,10 +38,12 @@ import { uploadDocument } from "@/lib/documents";
 
 interface DocumentUploadProps {
   onUploadComplete?: (documentId: string) => void;
+  onAnalysisComplete?: () => void;
 }
 
 export default function DocumentUpload({
   onUploadComplete = () => {},
+  onAnalysisComplete = () => {},
 }: DocumentUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -370,10 +372,14 @@ export default function DocumentUpload({
         .update({ status: "completed" })
         .eq("id", documentId);
 
+      console.log("Analyzis complete Toast trigger");
       toast({
         title: "Analysis Complete",
         description: "Your document has been successfully analyzed.",
       });
+
+      // Trigger document history refresh
+      onAnalysisComplete();
     } catch (error: any) {
       console.error("AI Analysis error:", error);
 
@@ -388,6 +394,9 @@ export default function DocumentUpload({
         title: "Analysis Failed",
         description: error.message || "AI analysis failed. Please try again.",
       });
+
+      // Trigger document history refresh even on failure to update status
+      onAnalysisComplete();
     }
   };
 

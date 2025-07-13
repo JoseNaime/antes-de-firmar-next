@@ -35,7 +35,7 @@ interface Document {
   id: string;
   name: string;
   date: string;
-  status: "good" | "concerning" | "problematic";
+  status: "good" | "concerning" | "problematic" | "analyzing";
 }
 
 interface DocumentHistoryProps {
@@ -77,6 +77,10 @@ const DocumentHistory = ({
         return <FileWarning className="h-4 w-4 text-yellow-500" />;
       case "problematic":
         return <FileWarning className="h-4 w-4 text-red-500" />;
+      case "analyzing":
+        return (
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+        );
       default:
         return <File className="h-4 w-4" />;
     }
@@ -109,6 +113,15 @@ const DocumentHistory = ({
             className="bg-red-100 text-red-800 border-red-300"
           >
             Problematic
+          </Badge>
+        );
+      case "analyzing":
+        return (
+          <Badge
+            variant="outline"
+            className="bg-blue-100 text-blue-800 border-blue-300"
+          >
+            Analyzing
           </Badge>
         );
       default:
@@ -244,8 +257,11 @@ const DocumentHistory = ({
                                   handleSelectDocument(document.id);
                                   setIsModalOpen(false);
                                 }}
+                                disabled={document.status === "analyzing"}
                               >
-                                View
+                                {document.status === "analyzing"
+                                  ? "Processing..."
+                                  : "View"}
                               </Button>
                               <Button
                                 variant="outline"
@@ -287,8 +303,9 @@ const DocumentHistory = ({
                 <Button
                   key={document.id}
                   variant="outline"
-                  className={`w-full justify-start text-left h-auto py-2 px-3 ${selectedDocumentId === document.id ? "border-primary bg-primary/5" : "border-gray-200"}`}
+                  className={`w-full justify-start text-left h-auto py-2 px-3 ${selectedDocumentId === document.id ? "border-primary bg-primary/5" : "border-gray-200"} ${document.status === "analyzing" ? "opacity-60" : ""}`}
                   onClick={() => handleSelectDocument(document.id)}
+                  disabled={document.status === "analyzing"}
                 >
                   <div className="flex flex-col w-full gap-1 min-w-0">
                     <div className="flex items-center gap-2 min-w-0">

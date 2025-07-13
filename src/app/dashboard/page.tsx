@@ -32,7 +32,7 @@ interface Document {
   id: string;
   name: string;
   date: string;
-  status: "good" | "concerning" | "problematic";
+  status: "good" | "concerning" | "problematic" | "analyzing";
 }
 
 export default function Dashboard() {
@@ -66,11 +66,19 @@ export default function Dashboard() {
         // Transform documents to match the expected format
         const transformedDocuments: Document[] = userDocuments.map((doc) => {
           const review = doc.ai_reviews?.[0];
+          // Show as "analyzing" if document is processing and has no review yet
+          let status: "good" | "concerning" | "problematic" | "analyzing" =
+            "good";
+          if (doc.status === "processing" && !review) {
+            status = "analyzing";
+          } else if (review?.overall_status) {
+            status = review.overall_status;
+          }
           return {
             id: doc.id,
             name: doc.name,
             date: new Date(doc.created_at).toISOString().split("T")[0],
-            status: review?.overall_status || "good",
+            status,
           };
         });
 
@@ -106,35 +114,42 @@ export default function Dashboard() {
     return null;
   }
 
-  const handleUploadComplete = async (documentId: string) => {
-    // Refresh documents list
-    if (user) {
-      try {
-        const userDocuments = await getUserDocuments(user.id);
-        const transformedDocuments: Document[] = userDocuments.map((doc) => {
-          const review = doc.ai_reviews?.[0];
-          return {
-            id: doc.id,
-            name: doc.name,
-            date: new Date(doc.created_at).toISOString().split("T")[0],
-            status: review?.overall_status || "good",
-          };
-        });
-        setDocuments(transformedDocuments);
+  const refreshDocuments = async () => {
+    if (!user) return;
 
-        // Switch to analysis view and load the new document
-        setActiveView("analysis");
-        setSelectedDocumentId(documentId);
-
-        const documentWithReview = await getDocumentWithReview(
-          documentId,
-          user.id,
-        );
-        setSelectedDocument(documentWithReview);
-      } catch (error) {
-        console.error("Error refreshing documents:", error);
-      }
+    try {
+      const userDocuments = await getUserDocuments(user.id);
+      const transformedDocuments: Document[] = userDocuments.map((doc) => {
+        const review = doc.ai_reviews?.[0];
+        // Show as "analyzing" if document is processing and has no review yet
+        let status: "good" | "concerning" | "problematic" | "analyzing" =
+          "good";
+        if (doc.status === "processing" && !review) {
+          status = "analyzing";
+        } else if (review?.overall_status) {
+          status = review.overall_status;
+        }
+        return {
+          id: doc.id,
+          name: doc.name,
+          date: new Date(doc.created_at).toISOString().split("T")[0],
+          status,
+        };
+      });
+      setDocuments(transformedDocuments);
+    } catch (error) {
+      console.error("Error refreshing documents:", error);
     }
+  };
+
+  const handleUploadComplete = async (documentId: string) => {
+    // Refresh documents list to show the new document as "analyzing"
+    await refreshDocuments();
+  };
+
+  const handleAnalysisComplete = async () => {
+    // Refresh documents list to show the updated analysis status
+    await refreshDocuments();
   };
 
   const handleSelectDocument = async (documentId: string) => {
@@ -155,9 +170,13 @@ export default function Dashboard() {
   };
 
   const getStatusCounts = () => {
-    const counts = { good: 0, concerning: 0, problematic: 0 };
+    const counts = { good: 0, concerning: 0, problematic: 0, analyzing: 0 };
     documents.forEach((doc) => {
-      counts[doc.status]++;
+      if (doc.status === "analyzing") {
+        counts.analyzing++;
+      } else {
+        counts[doc.status as "good" | "concerning" | "problematic"]++;
+      }
     });
     return counts;
   };
@@ -307,40 +326,15 @@ export default function Dashboard() {
               onSelectDocument={handleSelectDocument}
               onDocumentDeleted={async () => {
                 // Refresh documents list after deletion
-                if (user) {
-                  try {
-                    const userDocuments = await getUserDocuments(user.id);
-                    const transformedDocuments: Document[] = userDocuments.map(
-                      (doc) => {
-                        const review = doc.ai_reviews?.[0];
-                        return {
-                          id: doc.id,
-                          name: doc.name,
-                          date: new Date(doc.created_at)
-                            .toISOString()
-                            .split("T")[0],
-                          status: review?.overall_status || "good",
-                        };
-                      },
-                    );
-                    setDocuments(transformedDocuments);
+                await refreshDocuments();
 
-                    // Clear selected document if it was deleted
-                    if (
-                      selectedDocumentId &&
-                      !transformedDocuments.find(
-                        (doc) => doc.id === selectedDocumentId,
-                      )
-                    ) {
-                      setSelectedDocumentId(null);
-                      setSelectedDocument(null);
-                    }
-                  } catch (error) {
-                    console.error(
-                      "Error refreshing documents after deletion:",
-                      error,
-                    );
-                  }
+                // Clear selected document if it was deleted
+                if (
+                  selectedDocumentId &&
+                  !documents.find((doc) => doc.id === selectedDocumentId)
+                ) {
+                  setSelectedDocumentId(null);
+                  setSelectedDocument(null);
                 }
               }}
               userId={user?.id}
@@ -359,7 +353,10 @@ export default function Dashboard() {
                     Upload your legal document for AI-powered analysis
                   </p>
                 </div>
-                <DocumentUpload onUploadComplete={handleUploadComplete} />
+                <DocumentUpload
+                  onUploadComplete={handleUploadComplete}
+                  onAnalysisComplete={handleAnalysisComplete}
+                />
               </div>
             ) : (
               <div className="space-y-6">
