@@ -21,8 +21,54 @@ import {
 export default function Home() {
   return (
     <div className="bg-background min-h-screen">
+      {/* Fixed Navigation Header */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center">
+              <h1 className="text-xl font-bold">Legal Document AI</h1>
+            </div>
+            <div className="hidden md:flex items-center space-x-8">
+              <a
+                href="#features"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Features
+              </a>
+              <a
+                href="#analysis"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Analysis
+              </a>
+              <a
+                href="#pricing"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Pricing
+              </a>
+              <a
+                href="#testimonials"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Testimonials
+              </a>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Link href="/login">
+                <Button variant="ghost" size="sm">
+                  Sign In
+                </Button>
+              </Link>
+              <Link href="/register">
+                <Button size="sm">Get Started</Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </nav>
       {/* Hero Section */}
-      <section className="relative py-20 px-4 md:px-6 lg:px-8 flex flex-col items-center justify-center text-center bg-gradient-to-b from-background to-muted">
+      <section className="relative pt-32 pb-20 px-4 md:px-6 lg:px-8 flex flex-col items-center justify-center text-center bg-gradient-to-b from-background to-muted">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
             AI-Powered Legal Document Analysis
@@ -47,7 +93,10 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 px-4 md:px-6 lg:px-8 bg-background">
+      <section
+        id="features"
+        className="py-16 px-4 md:px-6 lg:px-8 bg-background"
+      >
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -111,7 +160,7 @@ export default function Home() {
       </section>
 
       {/* Analysis Showcase */}
-      <section className="py-16 px-4 md:px-6 lg:px-8 bg-muted">
+      <section id="analysis" className="py-16 px-4 md:px-6 lg:px-8 bg-muted">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">
             Comprehensive Document Analysis
@@ -169,8 +218,199 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Subscription Plans */}
+      <section
+        id="pricing"
+        className="py-16 px-4 md:px-6 lg:px-8 bg-background"
+      >
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-4">
+            Choose Your Plan
+          </h2>
+          <p className="text-xl text-muted-foreground text-center mb-12">
+            Select the perfect plan for your document analysis needs
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Freemium Plan */}
+            <Card className="relative bg-card">
+              <CardHeader>
+                <CardTitle className="text-2xl">Freemium</CardTitle>
+                <CardDescription className="text-lg">
+                  Perfect for trying out our service
+                </CardDescription>
+                <div className="mt-4">
+                  <span className="text-4xl font-bold">Free</span>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>50 tokens/month</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>Upload limit: 3 files</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>AI review only</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-muted-foreground">
+                    <XCircle className="h-4 w-4" />
+                    <span>No human review</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-muted-foreground">
+                    <XCircle className="h-4 w-4" />
+                    <span>No support prioritization</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-muted-foreground">
+                    <XCircle className="h-4 w-4" />
+                    <span>0% token purchase discount</span>
+                  </li>
+                </ul>
+              </CardContent>
+              <CardFooter>
+                <Link href="/register" className="w-full">
+                  <Button className="w-full" variant="outline">
+                    Get Started
+                  </Button>
+                </Link>
+              </CardFooter>
+            </Card>
+
+            {/* Basic Plan */}
+            <Card className="relative bg-card border-primary">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <span className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium">
+                  Most Popular
+                </span>
+              </div>
+              <CardHeader>
+                <CardTitle className="text-2xl">Basic</CardTitle>
+                <CardDescription className="text-lg">
+                  Great for regular users
+                </CardDescription>
+                <div className="mt-4">
+                  <span className="text-4xl font-bold">$19</span>
+                  <span className="text-muted-foreground">/month</span>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>100 tokens/month</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>Unlimited file uploads</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>Standard support</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>Human review access</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>5% token purchase discount</span>
+                  </li>
+                </ul>
+              </CardContent>
+              <CardFooter>
+                <Link href="/register" className="w-full">
+                  <Button className="w-full">Choose Basic</Button>
+                </Link>
+              </CardFooter>
+            </Card>
+
+            {/* Advanced Plan */}
+            <Card className="relative bg-card">
+              <CardHeader>
+                <CardTitle className="text-2xl">Advanced</CardTitle>
+                <CardDescription className="text-lg">
+                  For power users and businesses
+                </CardDescription>
+                <div className="mt-4">
+                  <span className="text-4xl font-bold">$49</span>
+                  <span className="text-muted-foreground">/month</span>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>500 tokens/month</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>Unlimited file uploads</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>Prioritized support</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>Human review with 10% discount</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>10% token purchase discount</span>
+                  </li>
+                </ul>
+              </CardContent>
+              <CardFooter>
+                <Link href="/register" className="w-full">
+                  <Button className="w-full" variant="outline">
+                    Choose Advanced
+                  </Button>
+                </Link>
+              </CardFooter>
+            </Card>
+          </div>
+
+          {/* Token System Info */}
+          <div className="mt-16">
+            <Card className="bg-muted/50">
+              <CardHeader>
+                <CardTitle className="text-center">How Tokens Work</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div>
+                    <h4 className="font-semibold mb-3">Token Usage</h4>
+                    <ul className="space-y-2 text-sm">
+                      <li>• Tokens are consumed when analyzing documents</li>
+                      <li>• Usage depends on document size and complexity</li>
+                      <li>• Typical document: 1-5 tokens</li>
+                      <li>• Large contracts: 5-15 tokens</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-3">Additional Tokens</h4>
+                    <ul className="space-y-2 text-sm">
+                      <li>• All plans can purchase additional tokens</li>
+                      <li>• Freemium: $0.10 per token</li>
+                      <li>• Basic: $0.095 per token (5% discount)</li>
+                      <li>• Advanced: $0.09 per token (10% discount)</li>
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* Testimonials */}
-      <section className="py-16 px-4 md:px-6 lg:px-8 bg-background">
+      <section
+        id="testimonials"
+        className="py-16 px-4 md:px-6 lg:px-8 bg-background"
+      >
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">
             What Our Users Say

@@ -169,6 +169,89 @@ export type Database = {
           },
         ]
       }
+      subscription_benefits: {
+        Row: {
+          created_at: string | null
+          human_review_access: boolean | null
+          id: string
+          monthly_tokens: number
+          support_prioritization: string | null
+          tier: Database["public"]["Enums"]["subscription_tier"]
+          token_purchase_discount: number | null
+          updated_at: string | null
+          upload_limit: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          human_review_access?: boolean | null
+          id?: string
+          monthly_tokens: number
+          support_prioritization?: string | null
+          tier: Database["public"]["Enums"]["subscription_tier"]
+          token_purchase_discount?: number | null
+          updated_at?: string | null
+          upload_limit?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          human_review_access?: boolean | null
+          id?: string
+          monthly_tokens?: number
+          support_prioritization?: string | null
+          tier?: Database["public"]["Enums"]["subscription_tier"]
+          token_purchase_discount?: number | null
+          updated_at?: string | null
+          upload_limit?: number | null
+        }
+        Relationships: []
+      }
+      user_subscriptions: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          last_token_reward_at: string | null
+          next_token_reward_at: string | null
+          stripe_subscription_id: string | null
+          subscribed_at: string | null
+          subscription_tier: Database["public"]["Enums"]["subscription_tier"]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_token_reward_at?: string | null
+          next_token_reward_at?: string | null
+          stripe_subscription_id?: string | null
+          subscribed_at?: string | null
+          subscription_tier: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_token_reward_at?: string | null
+          next_token_reward_at?: string | null
+          stripe_subscription_id?: string | null
+          subscribed_at?: string | null
+          subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           country: string | null
@@ -207,7 +290,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      subscription_tier: "freemium" | "basic" | "advanced"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -334,6 +417,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      subscription_tier: ["freemium", "basic", "advanced"],
+    },
   },
 } as const

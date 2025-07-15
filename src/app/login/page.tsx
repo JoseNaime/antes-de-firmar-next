@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import LoginForm from "@/components/auth/LoginForm";
 import { signIn, signInWithGoogle, getCurrentUser } from "@/lib/auth";
 
@@ -10,8 +10,9 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [checkingAuth, setCheckingAuth] = useState(true);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // Check if user is already authenticated
+  // Check if user is already authenticated and handle URL errors
   useEffect(() => {
     const checkAuthentication = async () => {
       try {
@@ -19,6 +20,16 @@ export default function LoginPage() {
         if (user) {
           router.replace("/dashboard");
           return;
+        }
+
+        // Check for error parameters
+        const errorParam = searchParams.get("error");
+        if (errorParam === "account_not_found") {
+          setError(
+            "Account not found. Please register first or use the registration page to create an account with Google.",
+          );
+        } else if (errorParam === "auth_failed") {
+          setError("Authentication failed. Please try again.");
         }
       } catch (error) {
         console.error("Error checking authentication:", error);
@@ -28,7 +39,7 @@ export default function LoginPage() {
     };
 
     checkAuthentication();
-  }, [router]);
+  }, [router, searchParams]);
 
   const handleLogin = async (email: string, password: string) => {
     setIsLoading(true);
@@ -52,7 +63,7 @@ export default function LoginPage() {
     setError("");
 
     try {
-      await signInWithGoogle();
+      await signInWithGoogle(false);
       // The redirect will be handled by Supabase
     } catch (err: any) {
       setError(err.message || "Google login failed. Please try again.");

@@ -29,10 +29,12 @@ import {
   EyeOff,
   ArrowLeft,
   Shield,
+  CreditCard,
 } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/lib/supabase";
-import { getUserDocuments } from "@/lib/documents";
+import { getUserDocuments, deleteAllUserDocuments } from "@/lib/documents";
+import SubscriptionPlans from "@/components/subscription/SubscriptionPlans";
 import Link from "next/link";
 
 export default function ProfilePage() {
@@ -57,6 +59,9 @@ export default function ProfilePage() {
   } | null>(null);
   const [documentCount, setDocumentCount] = useState(0);
   const [isAuthProvider, setIsAuthProvider] = useState(false);
+  const [activeTab, setActiveTab] = useState<"profile" | "subscription">(
+    "profile",
+  );
 
   useEffect(() => {
     if (!loading && !user) {
@@ -140,32 +145,7 @@ export default function ProfilePage() {
     setMessage(null);
 
     try {
-      // Get all document IDs for this user
-      const { data: documentIds, error: fetchError } = await supabase
-        .from("documents")
-        .select("id")
-        .eq("user_id", user.id);
-
-      if (fetchError) throw fetchError;
-
-      // Delete all AI reviews first (due to foreign key constraint)
-      const { error: reviewsError } = await supabase
-        .from("ai_reviews")
-        .delete()
-        .in(
-          "document_id",
-          documentIds?.map(doc => doc.id) || []
-        );
-
-      if (reviewsError) throw reviewsError;
-
-      // Delete all documents
-      const { error: documentsError } = await supabase
-        .from("documents")
-        .delete()
-        .eq("user_id", user.id);
-
-      if (documentsError) throw documentsError;
+      await deleteAllUserDocuments(user.id);
 
       setDocumentCount(0);
       setMessage({
@@ -190,7 +170,7 @@ export default function ProfilePage() {
 
     try {
       // First delete all related data
-      await handleDeleteData();
+      await deleteAllUserDocuments(user.id);
 
       // Delete user profile
       const { error: userError } = await supabase
@@ -246,7 +226,29 @@ export default function ProfilePage() {
                   Back to Dashboard
                 </Button>
               </Link>
-              <h1 className="text-2xl font-bold">Profile Settings</h1>
+              <div className="flex items-center gap-4">
+                <h1 className="text-2xl font-bold">Profile Settings</h1>
+                <div className="flex gap-2">
+                  <Button
+                    variant={activeTab === "profile" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setActiveTab("profile")}
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    Profile
+                  </Button>
+                  <Button
+                    variant={
+                      activeTab === "subscription" ? "default" : "outline"
+                    }
+                    size="sm"
+                    onClick={() => setActiveTab("subscription")}
+                  >
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Subscription
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -267,308 +269,326 @@ export default function ProfilePage() {
           </Alert>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Profile Information */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* User Info Card */}
-            <Card className="bg-white">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Profile Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">
-                      Name
-                    </label>
-                    <p className="text-lg">{user.name}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">
-                      Email
-                    </label>
-                    <p className="text-lg">{user.email}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">
-                      Country
-                    </label>
-                    <p className="text-lg">{user.country || "Not specified"}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">
-                      Available Tokens
-                    </label>
-                    <p className="text-lg font-semibold text-primary">
-                      {user.tokens}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Password Change Card */}
-            <Card className="bg-white">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Lock className="h-5 w-5" />
-                  Password Settings
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isAuthProvider ? (
-                  <Alert>
-                    <Shield className="h-4 w-4" />
-                    <AlertDescription>
-                      Your login is managed by your authentication provider
-                      (Google). Password changes must be done through your
-                      provider's account settings.
-                    </AlertDescription>
-                  </Alert>
-                ) : (
-                  <form onSubmit={handlePasswordChange} className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">
-                        Current Password
+        {activeTab === "profile" && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Profile Information */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* User Info Card */}
+              <Card className="bg-white">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Profile Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">
+                        Name
                       </label>
-                      <div className="relative">
-                        <Input
-                          type={showPasswords.current ? "text" : "password"}
-                          placeholder="Enter current password"
-                          value={passwordData.currentPassword}
-                          onChange={(e) =>
-                            setPasswordData((prev) => ({
-                              ...prev,
-                              currentPassword: e.target.value,
-                            }))
-                          }
-                          className="pr-10"
-                          disabled={isPasswordLoading}
-                        />
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setShowPasswords((prev) => ({
-                              ...prev,
-                              current: !prev.current,
-                            }))
-                          }
-                          className="absolute right-3 top-2 text-muted-foreground hover:text-foreground"
-                        >
-                          {showPasswords.current ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
+                      <p className="text-lg">{user.name}</p>
                     </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">
-                        New Password
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">
+                        Email
                       </label>
-                      <div className="relative">
-                        <Input
-                          type={showPasswords.new ? "text" : "password"}
-                          placeholder="Enter new password"
-                          value={passwordData.newPassword}
-                          onChange={(e) =>
-                            setPasswordData((prev) => ({
-                              ...prev,
-                              newPassword: e.target.value,
-                            }))
-                          }
-                          className="pr-10"
-                          disabled={isPasswordLoading}
-                        />
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setShowPasswords((prev) => ({
-                              ...prev,
-                              new: !prev.new,
-                            }))
-                          }
-                          className="absolute right-3 top-2 text-muted-foreground hover:text-foreground"
-                        >
-                          {showPasswords.new ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
+                      <p className="text-lg">{user.email}</p>
                     </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">
-                        Confirm New Password
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">
+                        Country
                       </label>
-                      <div className="relative">
-                        <Input
-                          type={showPasswords.confirm ? "text" : "password"}
-                          placeholder="Confirm new password"
-                          value={passwordData.confirmPassword}
-                          onChange={(e) =>
-                            setPasswordData((prev) => ({
-                              ...prev,
-                              confirmPassword: e.target.value,
-                            }))
-                          }
-                          className="pr-10"
-                          disabled={isPasswordLoading}
-                        />
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setShowPasswords((prev) => ({
-                              ...prev,
-                              confirm: !prev.confirm,
-                            }))
-                          }
-                          className="absolute right-3 top-2 text-muted-foreground hover:text-foreground"
-                        >
-                          {showPasswords.confirm ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
+                      <p className="text-lg">
+                        {user.country || "Not specified"}
+                      </p>
                     </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">
+                        Available Tokens
+                      </label>
+                      <p className="text-lg font-semibold text-primary">
+                        {user.tokens}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-                    <Button type="submit" disabled={isPasswordLoading}>
-                      {isPasswordLoading ? "Updating..." : "Update Password"}
-                    </Button>
-                  </form>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+              {/* Password Change Card */}
+              <Card className="bg-white">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Lock className="h-5 w-5" />
+                    Password Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {isAuthProvider ? (
+                    <Alert>
+                      <Shield className="h-4 w-4" />
+                      <AlertDescription>
+                        Your login is managed by your authentication provider
+                        (Google). Password changes must be done through your
+                        provider's account settings.
+                      </AlertDescription>
+                    </Alert>
+                  ) : (
+                    <form onSubmit={handlePasswordChange} className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">
+                          Current Password
+                        </label>
+                        <div className="relative">
+                          <Input
+                            type={showPasswords.current ? "text" : "password"}
+                            placeholder="Enter current password"
+                            value={passwordData.currentPassword}
+                            onChange={(e) =>
+                              setPasswordData((prev) => ({
+                                ...prev,
+                                currentPassword: e.target.value,
+                              }))
+                            }
+                            className="pr-10"
+                            disabled={isPasswordLoading}
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setShowPasswords((prev) => ({
+                                ...prev,
+                                current: !prev.current,
+                              }))
+                            }
+                            className="absolute right-3 top-2 text-muted-foreground hover:text-foreground"
+                          >
+                            {showPasswords.current ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
 
-          {/* Actions Sidebar */}
-          <div className="space-y-6">
-            {/* Account Stats */}
-            <Card className="bg-white">
-              <CardHeader>
-                <CardTitle className="text-lg">Account Overview</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">
-                    Documents Analyzed
-                  </span>
-                  <span className="font-semibold">{documentCount}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">
-                    Account Created
-                  </span>
-                  <span className="font-semibold">
-                    {new Date(user.created_at).toLocaleDateString()}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">
+                          New Password
+                        </label>
+                        <div className="relative">
+                          <Input
+                            type={showPasswords.new ? "text" : "password"}
+                            placeholder="Enter new password"
+                            value={passwordData.newPassword}
+                            onChange={(e) =>
+                              setPasswordData((prev) => ({
+                                ...prev,
+                                newPassword: e.target.value,
+                              }))
+                            }
+                            className="pr-10"
+                            disabled={isPasswordLoading}
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setShowPasswords((prev) => ({
+                                ...prev,
+                                new: !prev.new,
+                              }))
+                            }
+                            className="absolute right-3 top-2 text-muted-foreground hover:text-foreground"
+                          >
+                            {showPasswords.new ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
 
-            {/* Quick Actions */}
-            <Card className="bg-white">
-              <CardHeader>
-                <CardTitle className="text-lg">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {/* Delete Data */}
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start text-orange-600 border-orange-200 hover:bg-orange-50"
-                      disabled={documentCount === 0}
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete All Documents ({documentCount})
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete All Documents?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This will permanently delete all {documentCount}{" "}
-                        documents and their analysis results. This action cannot
-                        be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={handleDeleteData}
-                        className="bg-orange-600 hover:bg-orange-700"
-                        disabled={isDeleteDataLoading}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">
+                          Confirm New Password
+                        </label>
+                        <div className="relative">
+                          <Input
+                            type={showPasswords.confirm ? "text" : "password"}
+                            placeholder="Confirm new password"
+                            value={passwordData.confirmPassword}
+                            onChange={(e) =>
+                              setPasswordData((prev) => ({
+                                ...prev,
+                                confirmPassword: e.target.value,
+                              }))
+                            }
+                            className="pr-10"
+                            disabled={isPasswordLoading}
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setShowPasswords((prev) => ({
+                                ...prev,
+                                confirm: !prev.confirm,
+                              }))
+                            }
+                            className="absolute right-3 top-2 text-muted-foreground hover:text-foreground"
+                          >
+                            {showPasswords.confirm ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      <Button type="submit" disabled={isPasswordLoading}>
+                        {isPasswordLoading ? "Updating..." : "Update Password"}
+                      </Button>
+                    </form>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Actions Sidebar */}
+            <div className="space-y-6">
+              {/* Account Stats */}
+              <Card className="bg-white">
+                <CardHeader>
+                  <CardTitle className="text-lg">Account Overview</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">
+                      Documents Analyzed
+                    </span>
+                    <span className="font-semibold">{documentCount}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">
+                      Account Created
+                    </span>
+                    <span className="font-semibold">
+                      {new Date(user.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Quick Actions */}
+              <Card className="bg-white">
+                <CardHeader>
+                  <CardTitle className="text-lg">Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {/* Delete Data */}
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-orange-600 border-orange-200 hover:bg-orange-50"
+                        disabled={documentCount === 0}
                       >
-                        {isDeleteDataLoading
-                          ? "Deleting..."
-                          : "Delete All Data"}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete All Documents ({documentCount})
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Delete All Documents?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will permanently delete all {documentCount}{" "}
+                          documents and their analysis results. This action
+                          cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleDeleteData}
+                          className="bg-orange-600 hover:bg-orange-700"
+                          disabled={isDeleteDataLoading}
+                        >
+                          {isDeleteDataLoading
+                            ? "Deleting..."
+                            : "Delete All Data"}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
 
-                <Separator />
+                  <Separator />
 
-                {/* Logout */}
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={handleSignOut}
-                >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Sign Out
-                </Button>
+                  {/* Logout */}
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={handleSignOut}
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </Button>
 
-                <Separator />
+                  <Separator />
 
-                {/* Delete Account */}
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start text-red-600 border-red-200 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete Account
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Account?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This will permanently delete your account and all
-                        associated data, including {documentCount} documents and
-                        analysis results. This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={handleDeleteAccount}
-                        className="bg-red-600 hover:bg-red-700"
-                        disabled={isDeleteAccountLoading}
+                  {/* Delete Account */}
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-red-600 border-red-200 hover:bg-red-50"
                       >
-                        {isDeleteAccountLoading
-                          ? "Deleting..."
-                          : "Delete Account"}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </CardContent>
-            </Card>
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete Account
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Account?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will permanently delete your account and all
+                          associated data, including {documentCount} documents
+                          and analysis results. This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleDeleteAccount}
+                          className="bg-red-600 hover:bg-red-700"
+                          disabled={isDeleteAccountLoading}
+                        >
+                          {isDeleteAccountLoading
+                            ? "Deleting..."
+                            : "Delete Account"}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </div>
+        )}
+
+        {activeTab === "subscription" && (
+          <div className="max-w-6xl mx-auto">
+            <SubscriptionPlans
+              userId={user.id}
+              onSubscriptionChange={() => {
+                // Refresh user data when subscription changes
+                window.location.reload();
+              }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

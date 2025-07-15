@@ -1,9 +1,12 @@
+CREATE TYPE subscription_tier AS ENUM ('freemium', 'basic', 'advanced');
+
 CREATE TABLE IF NOT EXISTS public.users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT UNIQUE NOT NULL,
   name TEXT NOT NULL,
   country TEXT,
-  tokens INTEGER DEFAULT 1000,
+  tokens INTEGER DEFAULT 50,
+  subscription_tier subscription_tier DEFAULT 'freemium',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -39,10 +42,6 @@ CREATE TABLE IF NOT EXISTS public.ai_reviews (
 CREATE INDEX IF NOT EXISTS idx_documents_user_id ON public.documents(user_id);
 CREATE INDEX IF NOT EXISTS idx_ai_reviews_document_id ON public.ai_reviews(document_id);
 
-alter publication supabase_realtime add table public.users;
-alter publication supabase_realtime add table public.documents;
-alter publication supabase_realtime add table public.ai_reviews;
-
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -51,11 +50,14 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+DROP TRIGGER IF EXISTS update_users_updated_at ON public.users;
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON public.users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_documents_updated_at ON public.documents;
 CREATE TRIGGER update_documents_updated_at BEFORE UPDATE ON public.documents
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_ai_reviews_updated_at ON public.ai_reviews;
 CREATE TRIGGER update_ai_reviews_updated_at BEFORE UPDATE ON public.ai_reviews
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

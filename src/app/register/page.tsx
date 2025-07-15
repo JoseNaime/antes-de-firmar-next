@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import RegisterForm from "@/components/auth/RegisterForm";
 import { signUp, signInWithGoogle, getCurrentUser } from "@/lib/auth";
 
@@ -10,8 +10,9 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [checkingAuth, setCheckingAuth] = useState(true);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // Check if user is already authenticated
+  // Check if user is already authenticated and handle URL errors
   useEffect(() => {
     const checkAuthentication = async () => {
       try {
@@ -19,6 +20,12 @@ export default function RegisterPage() {
         if (user) {
           router.replace("/dashboard");
           return;
+        }
+
+        // Check for error parameters
+        const errorParam = searchParams.get("error");
+        if (errorParam === "registration_failed") {
+          setError("Registration failed. Please try again.");
         }
       } catch (error) {
         console.error("Error checking authentication:", error);
@@ -28,7 +35,7 @@ export default function RegisterPage() {
     };
 
     checkAuthentication();
-  }, [router]);
+  }, [router, searchParams]);
 
   const handleRegister = async (data: {
     email: string;
@@ -36,25 +43,8 @@ export default function RegisterPage() {
     name: string;
     country: string;
   }) => {
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const result = await signUp(
-        data.email,
-        data.password,
-        data.name,
-        data.country,
-      );
-
-      if (result.user) {
-        router.push("/dashboard");
-      }
-    } catch (err: any) {
-      setError(err.message || "Registration failed. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+    setError("Direct registration is disabled. Please use Google to register.");
+    return;
   };
 
   const handleGoogleRegister = async () => {
@@ -62,7 +52,7 @@ export default function RegisterPage() {
     setError("");
 
     try {
-      await signInWithGoogle();
+      await signInWithGoogle(true);
       // The redirect will be handled by Supabase
     } catch (err: any) {
       setError(err.message || "Google registration failed. Please try again.");

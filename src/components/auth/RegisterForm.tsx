@@ -314,8 +314,8 @@ const RegisterForm = ({
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Creating Account..." : "Create Account"}
+            <Button type="submit" className="w-full" disabled={true}>
+              Direct Registration Disabled
             </Button>
           </form>
 
@@ -325,7 +325,7 @@ const RegisterForm = ({
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-background px-2 text-muted-foreground">
-                Or continue with
+                Register with
               </span>
             </div>
           </div>

@@ -265,6 +265,67 @@ export const deleteDocument = async (documentId: string, userId: string) => {
   }
 };
 
+export const deleteAllUserDocuments = async (userId: string) => {
+  try {
+    // Get all document IDs for this user
+    const { data: documentIds, error: fetchError } = await supabase
+      .from("documents")
+      .select("id")
+      .eq("user_id", userId);
+
+    if (fetchError) throw fetchError;
+
+    // Delete all AI reviews first (due to foreign key constraint)
+    const { error: reviewsError } = await supabase
+      .from("ai_reviews")
+      .delete()
+      .in("document_id", documentIds?.map((doc) => doc.id) || []);
+
+    if (reviewsError) throw reviewsError;
+
+    // Delete all feedback records
+    const { error: feedbackError } = await supabase
+      .from("feedback")
+      .delete()
+      .eq("user_id", userId);
+
+    if (feedbackError) throw feedbackError;
+
+    // Delete all documents
+    const { error: documentsError } = await supabase
+      .from("documents")
+      .delete()
+      .eq("user_id", userId);
+
+    if (documentsError) throw documentsError;
+
+    // Delete entire user folder from storage
+    const { data: files, error: listError } = await supabase.storage
+      .from("users-documents")
+      .list(userId);
+
+    if (listError) {
+      console.warn("Could not list files for deletion:", listError);
+    } else if (files && files.length > 0) {
+      // Create file paths for deletion
+      const filePaths = files.map((file) => `${userId}/${file.name}`);
+
+      const { error: deleteError } = await supabase.storage
+        .from("users-documents")
+        .remove(filePaths);
+
+      if (deleteError) {
+        console.warn("Could not delete some files:", deleteError);
+      }
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Delete all user documents error:", error);
+    throw error;
+  }
+};
+
 export const extractTextFromFile = async (
   file: File,
 ): Promise<{ content: string; pageCount: number; wordCount: number }> => {
