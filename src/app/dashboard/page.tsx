@@ -6,6 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import Link from "next/link";
 import {
   FileText,
@@ -16,12 +23,16 @@ import {
   User,
   Settings,
   LogOut,
+  Crown,
+  Zap,
 } from "lucide-react";
 import DocumentUpload from "@/components/dashboard/DocumentUpload";
 import DocumentHistory from "@/components/dashboard/DocumentHistory";
 import AnalysisResults from "@/components/dashboard/AnalysisResults";
+import SubscriptionPlans from "@/components/subscription/SubscriptionPlans";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { getUserDocuments, getDocumentWithReview } from "@/lib/documents";
+import { getUserSubscription } from "@/lib/auth";
 import type { Database } from "@/lib/supabase";
 
 type DocumentWithReview = Database["public"]["Tables"]["documents"]["Row"] & {
@@ -35,6 +46,18 @@ interface Document {
   status: "good" | "concerning" | "problematic" | "analyzing";
 }
 
+interface UserSubscription {
+  subscription_tier: "freemium" | "basic" | "advanced";
+  is_active: boolean;
+  subscription_benefits?: {
+    monthly_tokens: number;
+    upload_limit: number | null;
+    human_review_access: boolean;
+    support_prioritization: string;
+    token_purchase_discount: number;
+  };
+}
+
 export default function Dashboard() {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
@@ -46,6 +69,9 @@ export default function Dashboard() {
   const [selectedDocument, setSelectedDocument] =
     useState<DocumentWithReview | null>(null);
   const [loadingDocuments, setLoadingDocuments] = useState(false);
+  const [userSubscription, setUserSubscription] =
+    useState<UserSubscription | null>(null);
+  const [subscriptionDialogOpen, setSubscriptionDialogOpen] = useState(false);
 
   useEffect(() => {
     console.log(loading, user);
@@ -54,14 +80,17 @@ export default function Dashboard() {
     }
   }, [user, loading, router]);
 
-  // Fetch user documents
+  // Fetch user documents and subscription
   useEffect(() => {
-    const fetchDocuments = async () => {
+    const fetchData = async () => {
       if (!user) return;
 
       setLoadingDocuments(true);
       try {
-        const userDocuments = await getUserDocuments(user.id);
+        const [userDocuments, subscription] = await Promise.all([
+          getUserDocuments(user.id),
+          getUserSubscription(user.id),
+        ]);
 
         // Transform documents to match the expected format
         const transformedDocuments: Document[] = userDocuments.map((doc) => {
@@ -83,14 +112,15 @@ export default function Dashboard() {
         });
 
         setDocuments(transformedDocuments);
+        setUserSubscription(subscription);
       } catch (error) {
-        console.error("Error fetching documents:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoadingDocuments(false);
       }
     };
 
-    fetchDocuments();
+    fetchData();
   }, [user]);
 
   const handleSignOut = async () => {
@@ -142,6 +172,17 @@ export default function Dashboard() {
     }
   };
 
+  const refreshSubscription = async () => {
+    if (!user) return;
+
+    try {
+      const subscription = await getUserSubscription(user.id);
+      setUserSubscription(subscription);
+    } catch (error) {
+      console.error("Error refreshing subscription:", error);
+    }
+  };
+
   const handleUploadComplete = async (documentId: string) => {
     // Refresh documents list to show the new document as "analyzing"
     await refreshDocuments();
@@ -183,6 +224,32 @@ export default function Dashboard() {
 
   const statusCounts = getStatusCounts();
 
+  const getSubscriptionIcon = (tier: string) => {
+    switch (tier) {
+      case "freemium":
+        return <Zap className="h-4 w-4" />;
+      case "basic":
+        return <User className="h-4 w-4" />;
+      case "advanced":
+        return <Crown className="h-4 w-4" />;
+      default:
+        return <Zap className="h-4 w-4" />;
+    }
+  };
+
+  const getSubscriptionColor = (tier: string) => {
+    switch (tier) {
+      case "freemium":
+        return "text-gray-600 bg-gray-100";
+      case "basic":
+        return "text-blue-600 bg-blue-100";
+      case "advanced":
+        return "text-purple-600 bg-purple-100";
+      default:
+        return "text-gray-600 bg-gray-100";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -200,11 +267,54 @@ export default function Dashboard() {
                 <span className="text-sm text-muted-foreground">
                   Welcome, {user.name}
                 </span>
-                <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full">
-                  <div className="h-2 w-2 rounded-full bg-primary"></div>
-                  <span className="text-sm font-medium text-primary">
-                    {user.tokens || 0} tokens
-                  </span>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full">
+                    <div className="h-2 w-2 rounded-full bg-primary"></div>
+                    <span className="text-sm font-medium text-primary">
+                      {user.tokens || 0} tokens
+                    </span>
+                  </div>
+                  <Dialog
+                    open={subscriptionDialogOpen}
+                    onOpenChange={setSubscriptionDialogOpen}
+                  >
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className={`flex items-center gap-2 px-3 py-1 rounded-full border-2 hover:scale-105 transition-transform cursor-pointer ${
+                          userSubscription
+                            ? getSubscriptionColor(
+                                userSubscription.subscription_tier,
+                              )
+                            : "text-gray-600 bg-gray-100"
+                        }`}
+                      >
+                        {userSubscription ? (
+                          getSubscriptionIcon(
+                            userSubscription.subscription_tier,
+                          )
+                        ) : (
+                          <Zap className="h-4 w-4" />
+                        )}
+                        <span className="text-sm font-medium capitalize">
+                          {userSubscription?.subscription_tier || "freemium"}
+                        </span>
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Manage Your Subscription</DialogTitle>
+                      </DialogHeader>
+                      <SubscriptionPlans
+                        userId={user.id}
+                        onSubscriptionChange={async () => {
+                          await refreshSubscription();
+                          setSubscriptionDialogOpen(false);
+                        }}
+                      />
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
               <div className="flex items-center gap-2">
