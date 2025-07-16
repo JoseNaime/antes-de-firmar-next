@@ -30,10 +30,14 @@ import {
   ArrowLeft,
   Shield,
   CreditCard,
+  Crown,
+  Zap,
+  Calendar,
 } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/lib/supabase";
 import { getUserDocuments, deleteAllUserDocuments } from "@/lib/documents";
+import { getUserSubscription } from "@/lib/auth";
 import SubscriptionPlans from "@/components/subscription/SubscriptionPlans";
 import Link from "next/link";
 
@@ -62,6 +66,8 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<"profile" | "subscription">(
     "profile",
   );
+  const [subscriptionData, setSubscriptionData] = useState<any>(null);
+  const [subscriptionLoading, setSubscriptionLoading] = useState(true);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -88,6 +94,17 @@ export default function ProfilePage() {
           setDocumentCount(documents.length);
         } catch (error) {
           console.error("Error fetching documents:", error);
+        }
+
+        // Get subscription data
+        try {
+          setSubscriptionLoading(true);
+          const subscription = await getUserSubscription(user.id);
+          setSubscriptionData(subscription);
+        } catch (error) {
+          console.error("Error fetching subscription:", error);
+        } finally {
+          setSubscriptionLoading(false);
         }
       }
     };
@@ -457,6 +474,85 @@ export default function ProfilePage() {
 
             {/* Actions Sidebar */}
             <div className="space-y-6">
+              {/* Subscription Info */}
+              <Card className="bg-white">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <CreditCard className="h-5 w-5" />
+                    Current Subscription
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {subscriptionLoading ? (
+                    <div className="animate-pulse space-y-3">
+                      <div className="h-4 bg-muted rounded w-3/4"></div>
+                      <div className="h-4 bg-muted rounded w-1/2"></div>
+                      <div className="h-4 bg-muted rounded w-2/3"></div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">
+                          Plan
+                        </span>
+                        <div className="flex items-center gap-2">
+                          {subscriptionData?.subscription_tier ===
+                            "freemium" && (
+                            <Zap className="h-4 w-4 text-gray-600" />
+                          )}
+                          {subscriptionData?.subscription_tier === "basic" && (
+                            <User className="h-4 w-4 text-blue-600" />
+                          )}
+                          {subscriptionData?.subscription_tier ===
+                            "advanced" && (
+                            <Crown className="h-4 w-4 text-purple-600" />
+                          )}
+                          <span className="font-semibold capitalize">
+                            {subscriptionData?.subscription_tier || "Freemium"}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">
+                          Monthly Tokens
+                        </span>
+                        <span className="font-semibold">
+                          {subscriptionData?.subscription_benefits
+                            ?.monthly_tokens || 50}
+                        </span>
+                      </div>
+                      {subscriptionData?.next_token_reward_at && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-muted-foreground">
+                            Next Charge
+                          </span>
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-semibold">
+                              {new Date(
+                                subscriptionData.next_token_reward_at,
+                              ).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                      {subscriptionData?.subscription_tier === "freemium" && (
+                        <div className="pt-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full"
+                            onClick={() => setActiveTab("subscription")}
+                          >
+                            Upgrade Plan
+                          </Button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+
               {/* Account Stats */}
               <Card className="bg-white">
                 <CardHeader>
