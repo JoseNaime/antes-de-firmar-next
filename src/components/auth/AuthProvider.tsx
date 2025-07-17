@@ -32,36 +32,61 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const getCurrentUser = async (): Promise<User | null> => {
     try {
-      const {
-        data: { session },
-        error: sessionError,
-      } = await supabase.auth.getSession();
+      console.log("getCurrentUser: Starting function");
+      
+      // Add a timeout to the entire function
+      const functionTimeout = new Promise<null>((_, reject) => {
+        setTimeout(() => reject(new Error("getCurrentUser function timeout")), 2000);
+      });
 
-      if (sessionError) {
-        console.error("Session error:", sessionError);
-        return null;
-      }
+      const getUserData = async (): Promise<User | null> => {
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
 
-      if (!session?.user) {
-        console.log("No active session found");
-        return null;
-      }
+        console.log("getCurrentUser: Session result:", { session: !!session, error: sessionError });
 
-      console.log("Fetching user profile for:", session.user.id);
+        if (sessionError) {
+          console.error("Session error:", sessionError);
+          return null;
+        }
 
-      const { data: userData, error: userError } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", session.user.id)
-        .single();
+        if (!session?.user) {
+          console.log("No active session found");
+          return null;
+        }
 
-      if (userError) {
-        console.error("User profile error:", userError);
-        return null;
-      }
+        console.log("Fetching user profile for:", session.user.id);
 
-      console.log("User profile loaded:", userData?.name);
-      return userData;
+        // Add timeout to the Supabase query
+        const queryPromise = supabase
+          .from("users")
+          .select("*")
+          .eq("id", session.user.id)
+          .single();
+
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error("Database query timeout")), 1500);
+        });
+
+        const { data: userData, error: userError } = await Promise.race([
+          queryPromise,
+          timeoutPromise
+        ]) as any;
+
+        console.log("getCurrentUser: User query result:", { userData: !!userData, error: userError });
+
+        if (userError) {
+          console.error("User profile error:", userError);
+          return null;
+        }
+
+        console.log("User profile loaded:", userData?.name);
+        return userData;
+      };
+
+      return await Promise.race([getUserData(), functionTimeout]);
     } catch (error) {
       console.error("Get current user error:", error);
       return null;
@@ -133,42 +158,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (event === "SIGNED_IN" && session?.user) {
         console.log("User signed in, refreshing user");
         
-        // If user is already loaded and matches the session, just set loading to false
+        // If user is already loaded and matches the session, just ensure loading is false
         if (user?.id === session.user.id) {
-          console.log("User already loaded, just setting loading to false");
+          console.log("User already loaded and matches session, ensuring loading is false");
           setLoading(false);
           return;
         }
         
+        console.log("SIGNED_IN: About to set loading to true");
         setLoading(true);
         
         // Add timeout to prevent stuck loading state
         const timeoutId = setTimeout(() => {
           console.log("Timeout reached, forcing loading to false");
           setLoading(false);
-        }, 10010); // 10 second timeout
+        }, 3000); // Reduced timeout to 3 seconds
         
         try {
           console.log("About to call getCurrentUser in SIGNED_IN handler");
+          console.log("SIGNED_IN: Calling getCurrentUser...");
           const userData = await getCurrentUser();
           console.log("User data loaded in SIGNED_IN:", userData?.name);
           clearTimeout(timeoutId);
           
-          // Check if user data is the same as current user
-          if (userData?.id === user?.id) {
-            console.log("User data is the same, setting loading to false");
-            setLoading(false);
-          } else {
+          if (userData) {
+            console.log("SIGNED_IN: Setting user data:", userData);
             setUser(userData);
-            console.log("Setting loading to false after SIGNED_IN");
-            setLoading(false);
+          } else {
+            console.log("SIGNED_IN: getCurrentUser returned null, keeping existing user data");
           }
+          console.log("Setting loading to false after SIGNED_IN");
+          setLoading(false);
         } catch (error) {
           console.error("Error refreshing user on sign in:", error);
           clearTimeout(timeoutId);
-          setUser(null);
-          console.log("Setting loading to false after SIGNED_IN error");
-          setLoading(false);
+          
+          // If getCurrentUser fails, keep the existing user data if it matches the session
+          if (user?.id === session.user.id) {
+            console.log("getCurrentUser failed but user matches session, keeping existing user data");
+            setLoading(false);
+          } else {
+            console.log("getCurrentUser failed and no matching user, setting user to null");
+            setUser(null);
+            setLoading(false);
+          }
         }
       } else if (event === "SIGNED_OUT" || !session) {
         console.log("User signed out or no session");
@@ -177,9 +210,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       } else if (event === "TOKEN_REFRESHED" && session?.user) {
         console.log("Token refreshed, refreshing user");
         
-        // If user is already loaded and matches the session, just set loading to false
+        // If user is already loaded and matches the session, just ensure loading is false
         if (user?.id === session.user.id) {
-          console.log("User already loaded, just setting loading to false");
+          console.log("User already loaded and matches session, ensuring loading is false");
           setLoading(false);
           return;
         }
@@ -190,7 +223,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         const timeoutId = setTimeout(() => {
           console.log("Timeout reached, forcing loading to false");
           setLoading(false);
-        }, 10010); // 10 second timeout
+        }, 3000); // Reduced timeout to 3 seconds
         
         try {
           console.log("About to call getCurrentUser in TOKEN_REFRESHED handler");
@@ -198,21 +231,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           console.log("User data loaded in TOKEN_REFRESHED:", userData?.name);
           clearTimeout(timeoutId);
           
-          // Check if user data is the same as current user
-          if (userData?.id === user?.id) {
-            console.log("User data is the same, setting loading to false");
-            setLoading(false);
-          } else {
+          if (userData) {
             setUser(userData);
-            console.log("Setting loading to false after TOKEN_REFRESHED");
-            setLoading(false);
+          } else {
+            console.log("TOKEN_REFRESHED: getCurrentUser returned null, keeping existing user data");
           }
+          console.log("Setting loading to false after TOKEN_REFRESHED");
+          setLoading(false);
         } catch (error) {
           console.error("Error refreshing user on token refresh:", error);
           clearTimeout(timeoutId);
-          setUser(null);
-          console.log("Setting loading to false after TOKEN_REFRESHED error");
-          setLoading(false);
+          
+          // If getCurrentUser fails, keep the existing user data if it matches the session
+          if (user?.id === session.user.id) {
+            console.log("getCurrentUser failed but user matches session, keeping existing user data");
+            setLoading(false);
+          } else {
+            console.log("getCurrentUser failed and no matching user, setting user to null");
+            setUser(null);
+            setLoading(false);
+          }
         }
       }
     });
@@ -228,7 +266,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       console.log("Loading is true but user exists, forcing loading to false");
       const timeoutId = setTimeout(() => {
         setLoading(false);
-      }, 2000); // 2 second delay
+      }, 1500); // Reduced to 1.5 seconds for faster response
       
       return () => clearTimeout(timeoutId);
     }

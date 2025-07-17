@@ -55,6 +55,9 @@ import Link from "next/link";
 export default function ProfilePage() {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
+  
+  console.log("ProfilePage render - user:", user?.name, "loading:", loading);
+  
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
   const [isDeleteDataLoading, setIsDeleteDataLoading] = useState(false);
   const [isDeleteAccountLoading, setIsDeleteAccountLoading] = useState(false);
@@ -94,8 +97,10 @@ export default function ProfilePage() {
   }, [user, loading, router]);
 
   useEffect(() => {
+    console.log("Profile useEffect triggered - user:", user?.name, "loading:", loading);
     const checkAuthProvider = async () => {
-      if (user) {
+      if (user && !loading) {
+        console.log("Profile: Starting to fetch data for user:", user.id);
         // Check if user signed up with OAuth provider
         const { data: authUser } = await supabase.auth.getUser();
         console.log("Auth user:", authUser);
@@ -108,17 +113,21 @@ export default function ProfilePage() {
 
         // Get document count
         try {
+          console.log("Profile: Fetching documents for user:", user.id);
           const documents = await getUserDocuments(user.id);
           setDocumentCount(documents.length);
+          console.log("Profile: Document count set to:", documents.length);
         } catch (error) {
           console.error("Error fetching documents:", error);
         }
 
         // Get subscription data
         try {
+          console.log("Profile: Fetching subscription for user:", user.id);
           setSubscriptionLoading(true);
           const subscription = await getUserSubscription(user.id);
           setSubscriptionData(subscription);
+          console.log("Profile: Subscription data loaded:", subscription);
         } catch (error) {
           console.error("Error fetching subscription:", error);
         } finally {
@@ -128,7 +137,7 @@ export default function ProfilePage() {
     };
 
     checkAuthProvider();
-  }, [user]);
+  }, [user, loading]);
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();

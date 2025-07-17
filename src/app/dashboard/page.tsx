@@ -97,15 +97,19 @@ export default function Dashboard() {
   // Fetch user documents and subscription
   useEffect(() => {
     const fetchData = async () => {
-      if (!user) return;
+      if (!user || loading) return;
 
       console.log("Fetching user documents and subscription for user:", user.id);
       setLoadingDocuments(true);
       try {
+        console.log("Dashboard: Starting to fetch documents and subscription");
         const [userDocuments, subscription] = await Promise.all([
           getUserDocuments(user.id),
           getUserSubscription(user.id),
         ]);
+
+        console.log("Dashboard: Documents fetched:", userDocuments.length);
+        console.log("Dashboard: Subscription fetched:", subscription);
 
         // Transform documents to match the expected format
         const transformedDocuments: Document[] = userDocuments.map((doc) => {
@@ -137,7 +141,7 @@ export default function Dashboard() {
     };
 
     fetchData();
-  }, [user]);
+  }, [user, loading]);
 
   const handleSignOut = async () => {
     await signOut();
