@@ -113,10 +113,23 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({
   // If document is processing, show loading state
   if (document.status === "processing") {
     return (
-      <div className="flex flex-col items-center justify-center h-[600] bg-background">
-        <div className="flex flex-col items-center">
-          <div className="animate-spin rounded-full h-16 border-b-2 border-primary mb-4"></div>
-          <p className="text-lg font-medium text-muted-foreground mb-2">Obteniendo información...</p>
+      <div className="flex flex-col items-center justify-center h-[600px] bg-background">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-300 border-t-primary"></div>
+          <p className="text-lg font-medium text-muted-foreground animate-pulse">
+            Analyzing document...
+          </p>
+          <div className="flex space-x-1">
+            <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+            <div
+              className="w-2 h-2 bg-primary rounded-full animate-bounce"
+              style={{ animationDelay: "0.1s" }}
+            ></div>
+            <div
+              className="w-2 h-2 bg-primary rounded-full animate-bounce"
+              style={{ animationDelay: "0.2s" }}
+            ></div>
+          </div>
         </div>
       </div>
     );

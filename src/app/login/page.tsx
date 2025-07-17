@@ -52,7 +52,10 @@ export default function LoginPage() {
         router.push("/dashboard");
       }
     } catch (err: any) {
-      setError(err.message || "Correo electrónico o contraseña inválidos. Por favor intenta de nuevo.");
+      setError(
+        err.message ||
+          "Correo electrónico o contraseña inválidos. Por favor intenta de nuevo.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -66,7 +69,10 @@ export default function LoginPage() {
       await signInWithGoogle(false);
       // The redirect will be handled by Supabase
     } catch (err: any) {
-      setError(err.message || "El inicio de sesión con Google falló. Por favor intenta de nuevo.");
+      setError(
+        err.message ||
+          "El inicio de sesión con Google falló. Por favor intenta de nuevo.",
+      );
       setIsLoading(false);
     }
   };
@@ -75,9 +81,11 @@ export default function LoginPage() {
   if (checkingAuth) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="flex flex-col items-center">
-          <div className="animate-spin rounded-full h-12 border-b-2 border-primary mb-4"></div>
-          <p className="text-lg font-medium text-muted-foreground">Obteniendo información...</p>
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-300 border-t-primary"></div>
+          <p className="text-lg font-medium text-muted-foreground animate-pulse">
+            Obteniendo información...
+          </p>
         </div>
       </div>
     );
