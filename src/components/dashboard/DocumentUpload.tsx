@@ -87,7 +87,7 @@ export default function DocumentUpload({
 
     if (!allowedFileTypes.includes(extension)) {
       setErrorMessage(
-        `Invalid file type. Please upload ${allowedFileTypes.join(", ")} files only.`,
+        `Tipo de archivo inválido. Por favor sube solo archivos ${allowedFileTypes.join(", ")}.`,
       );
       setUploadStatus("error");
       return false;
@@ -95,7 +95,7 @@ export default function DocumentUpload({
 
     if (file.size > 10 * 1024 * 1024) {
       // 10MB limit
-      setErrorMessage("File size exceeds 10MB limit.");
+      setErrorMessage("El tamaño del archivo excede el límite de 10MB.");
       setUploadStatus("error");
       return false;
     }
@@ -134,7 +134,7 @@ export default function DocumentUpload({
   // Call external API to scan file
   const scanFile = async (file: File) => {
     if (!user) {
-      setErrorMessage("Please log in to upload documents.");
+      setErrorMessage("Por favor inicia sesión para subir documentos.");
       setUploadStatus("error");
       return;
     }
@@ -148,7 +148,7 @@ export default function DocumentUpload({
         data: { session },
       } = await supabase.auth.getSession();
       if (!session?.access_token) {
-        setErrorMessage("Authentication required. Please log in again.");
+        setErrorMessage("Autenticación requerida. Por favor inicia sesión nuevamente.");
         setUploadStatus("error");
         return;
       }
@@ -157,15 +157,9 @@ export default function DocumentUpload({
       const formData = new FormData();
       formData.append("file", file);
 
-      console.log(session.access_token);
-
-      for (const [key, value] of formData.entries()) {
-        console.log(key, value);
-      }
-
       // Call external API with proper headers to prevent caching
       const response = await fetch(
-        "https://8cf2746fa256.ngrok-free.app/api/v1/getfileinfo",
+        "https://1bd3d67d31a0.ngrok-free.app/api/v1/getfileinfo",
         {
           method: "POST",
           headers: {
@@ -179,7 +173,7 @@ export default function DocumentUpload({
 
       if (!response.ok) {
         throw new Error(
-          `API request failed: ${response.status} ${response.statusText}`,
+          `La solicitud a la API falló: ${response.status} ${response.statusText}`,
         );
       }
 
@@ -190,14 +184,14 @@ export default function DocumentUpload({
       // Check if file is suitable for AI analysis
       if (apiResponse.is_suitable_for_ai === false) {
         setErrorMessage(
-          "We apologize, but this file format is not supported for AI analysis. Please try again with a different format (PDF, DOC, DOCX, or TXT) or ensure your document contains readable text content.",
+          "Lo sentimos, pero este formato de archivo no es compatible con el análisis de IA. Por favor intenta con un formato diferente (PDF, DOC, DOCX o TXT) o asegúrate de que tu documento contenga texto legible.",
         );
         setUploadStatus("error");
         toast({
           variant: "destructive",
-          title: "File Not Supported",
+          title: "Archivo No Compatible",
           description:
-            "This file cannot be analyzed by our AI. Please try a different format.",
+            "Este archivo no puede ser analizado por nuestra IA. Por favor intenta con un formato diferente.",
         });
         return;
       }
@@ -213,13 +207,13 @@ export default function DocumentUpload({
       if (user.tokens < tokensRequired) {
         const missingTokens = tokensRequired - user.tokens;
         setErrorMessage(
-          `Insufficient tokens. You need ${missingTokens} more tokens to proceed with this upload.`,
+          `Tokens insuficientes. Necesitas ${missingTokens} tokens más para proceder con esta carga.`,
         );
         setUploadStatus("error");
         toast({
           variant: "destructive",
-          title: "Insufficient Tokens",
-          description: `You need ${missingTokens} more tokens to analyze this document.`,
+          title: "Tokens Insuficientes",
+          description: `Necesitas ${missingTokens} tokens más para analizar este documento.`,
         });
         return;
       }
@@ -229,12 +223,12 @@ export default function DocumentUpload({
       setShowConfirmDialog(true);
     } catch (error: any) {
       console.error("Scan file error:", error);
-      setErrorMessage(error.message || "File scan failed. Please try again.");
+      setErrorMessage(error.message || "El escaneo del archivo falló. Por favor intenta de nuevo.");
       setUploadStatus("error");
       toast({
         variant: "destructive",
-        title: "Scan Failed",
-        description: "Failed to scan the file. Please try again.",
+        title: "Escaneo Fallido",
+        description: "Falló el escaneo del archivo. Por favor intenta de nuevo.",
       });
     }
   };
@@ -284,7 +278,7 @@ export default function DocumentUpload({
 
       // Upload document to storage and database (content will be extracted server-side)
       const document = await uploadDocument(
-        user.id,
+        user!.id,
         file,
         "", // Empty content for now, will be populated by server
         scanData.pageCount,
@@ -303,19 +297,19 @@ export default function DocumentUpload({
       );
 
       toast({
-        title: "Upload Successful",
+        title: "Carga Exitosa",
         description:
-          "Your document has been uploaded and analysis has started.",
+          "Tu documento ha sido cargado y el análisis ha comenzado.",
       });
 
       onUploadComplete(document.id);
     } catch (error: any) {
-      setErrorMessage(error.message || "Upload failed. Please try again.");
+      setErrorMessage(error.message || "La carga falló. Por favor intenta de nuevo.");
       setUploadStatus("error");
       toast({
         variant: "destructive",
-        title: "Upload Failed",
-        description: error.message || "Upload failed. Please try again.",
+        title: "Carga Fallida",
+        description: error.message || "La carga falló. Por favor intenta de nuevo.",
       });
     }
   };
@@ -345,7 +339,7 @@ export default function DocumentUpload({
 
       // Call AI analysis API with proper headers to prevent caching
       const response = await fetch(
-        "https://8cf2746fa256.ngrok-free.app/api/v1/analyze",
+        "https://1bd3d67d31a0.ngrok-free.app/api/v1/analyze",
         {
           method: "POST",
           headers: {
@@ -359,7 +353,7 @@ export default function DocumentUpload({
 
       if (!response.ok) {
         throw new Error(
-          `AI analysis failed: ${response.status} ${response.statusText}`,
+          `El análisis falló: ${response.status} ${response.statusText}`,
         );
       }
 
@@ -374,8 +368,8 @@ export default function DocumentUpload({
 
       console.log("Analyzis complete Toast trigger");
       toast({
-        title: "Analysis Complete",
-        description: "Your document has been successfully analyzed.",
+        title: "Análisis Completado",
+        description: "Tu documento ha sido analizado exitosamente.",
       });
 
       // Trigger document history refresh
@@ -391,8 +385,8 @@ export default function DocumentUpload({
 
       toast({
         variant: "destructive",
-        title: "Analysis Failed",
-        description: error.message || "AI analysis failed. Please try again.",
+        title: "Análisis Fallido",
+        description: error.message || "El análisis de IA falló. Por favor intenta de nuevo.",
       });
 
       // Trigger document history refresh even on failure to update status
@@ -416,9 +410,9 @@ export default function DocumentUpload({
       <CardContent className="p-6">
         <div className="mb-4">
           <h2 className="text-2xl font-semibold text-gray-800">
-            Upload Legal Document
+            Subir Documento
           </h2>
-          <p className="text-gray-500">Upload your document for AI analysis</p>
+          <p className="text-gray-500">Sube tu documento para análizarlo</p>
         </div>
 
         {uploadStatus === "error" && (
@@ -432,7 +426,7 @@ export default function DocumentUpload({
           <div className="flex flex-col items-center justify-center p-6 border-2 border-green-500 border-dashed rounded-lg bg-green-50">
             <CheckCircle className="h-12 w-12 text-green-500 mb-2" />
             <p className="text-lg font-medium text-green-700">
-              Upload Complete!
+              ¡Carga Completada!
             </p>
             <p className="text-sm text-green-600 mb-4">{file?.name}</p>
             <Button
@@ -442,7 +436,7 @@ export default function DocumentUpload({
               }}
               variant="outline"
             >
-              Upload Another Document
+              Subir Otro Documento
             </Button>
           </div>
         ) : (
@@ -463,7 +457,7 @@ export default function DocumentUpload({
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 </div>
                 <p className="text-center text-sm text-gray-500">
-                  Scanning document for analysis...
+                  Escaneando documento para análisis...
                 </p>
               </div>
             ) : uploadStatus === "uploading" ? (
@@ -474,23 +468,23 @@ export default function DocumentUpload({
                 <p className="text-center mb-2">{file?.name}</p>
                 <Progress value={uploadProgress} className="mb-2" />
                 <p className="text-center text-sm text-gray-500">
-                  {uploadProgress}% uploaded
+                  {uploadProgress}% subido
                 </p>
               </div>
             ) : (
               <>
                 <Upload className="h-12 w-12 text-gray-400 mb-4" />
                 <p className="text-lg font-medium text-gray-700 mb-1">
-                  Drag and drop your document here
+                  Arrastra y suelta tu documento aquí
                 </p>
                 <p className="text-sm text-gray-500 mb-4">
-                  or click to browse files
+                  o haz clic para explorar archivos
                 </p>
                 <p className="text-xs text-gray-400 mb-4">
-                  Supported formats: PDF, DOC, DOCX, TXT (Max 10MB)
+                  Formatos soportados: PDF, DOC, DOCX, TXT (Máx 10MB)
                 </p>
                 <div className="relative">
-                  <Button type="button">Browse Files</Button>
+                  <Button type="button">Explorar Archivos</Button>
                   <input
                     type="file"
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
@@ -513,34 +507,34 @@ export default function DocumentUpload({
             <AlertDialogHeader>
               <AlertDialogTitle className="flex items-center gap-2">
                 <Coins className="h-5 w-5 text-primary" />
-                Confirm Document Upload
+                Confirmar Carga de Documento
               </AlertDialogTitle>
               <AlertDialogDescription>
                 <div className="space-y-4">
-                  <p>Document scan completed. Here are the details:</p>
+                  <p>Antes de escanear este documento... Aquí están los detalles:</p>
                   <div className="bg-gray-50 p-4 rounded-lg space-y-2">
                     <div className="flex justify-between">
-                      <span className="font-medium">File:</span>
+                      <span className="font-medium">Archivo:</span>
                       <span>{file?.name}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="font-medium">Pages:</span>
+                      <span className="font-medium">Páginas:</span>
                       <span>{scanResults?.pageCount}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="font-medium">Words:</span>
+                      <span className="font-medium">Palabras:</span>
                       <span>{scanResults?.wordCount}</span>
                     </div>
                     <div className="flex justify-between border-t pt-2">
                       <span className="font-medium text-primary">
-                        Tokens Required:
+                        Tokens Requeridos:
                       </span>
                       <span className="font-bold text-primary">
                         {scanResults?.tokensRequired}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="font-medium">Your Balance:</span>
+                      <span className="font-medium">Tu Saldo:</span>
                       <span
                         className={
                           user &&
@@ -557,31 +551,31 @@ export default function DocumentUpload({
 
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="document-type">Document Type *</Label>
+                      <Label htmlFor="document-type">Tipo de Documento *</Label>
                       <Select
                         value={documentType}
                         onValueChange={setDocumentType}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select document type" />
+                          <SelectValue placeholder="Selecciona el tipo de documento" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="finance">Finance</SelectItem>
-                          <SelectItem value="work">Work</SelectItem>
-                          <SelectItem value="rent">Rent</SelectItem>
+                          <SelectItem value="finance">Finanzas</SelectItem>
+                          <SelectItem value="work">Trabajo</SelectItem>
+                          <SelectItem value="rent">Renta</SelectItem>
                           <SelectItem value="legal">Legal</SelectItem>
-                          <SelectItem value="insurance">Insurance</SelectItem>
-                          <SelectItem value="contract">Contract</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
+                          <SelectItem value="insurance">Seguros</SelectItem>
+                          <SelectItem value="contract">Contrato</SelectItem>
+                          <SelectItem value="other">Otro</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="context">Context (Optional)</Label>
+                      <Label htmlFor="context">Contexto (Opcional)</Label>
                       <Input
                         id="context"
-                        placeholder="Brief description or additional context..."
+                        placeholder="Breve descripción o contexto adicional... Ayuda a un mejor análisis"
                         value={context}
                         onChange={(e) => setContext(e.target.value)}
                         maxLength={200}
@@ -590,20 +584,20 @@ export default function DocumentUpload({
                   </div>
 
                   <p className="text-sm text-muted-foreground">
-                    Do you want to proceed with the upload and analysis?
+                    ¿Quieres proceder con el análisis?
                   </p>
                 </div>
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel onClick={handleCancelUpload}>
-                Cancel
+                Cancelar
               </AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleConfirmUpload}
                 disabled={!documentType}
               >
-                Proceed with Upload
+                Subir Documento
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

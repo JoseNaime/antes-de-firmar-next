@@ -26,10 +26,10 @@ export default function LoginPage() {
         const errorParam = searchParams.get("error");
         if (errorParam === "account_not_found") {
           setError(
-            "Account not found. Please register first or use the registration page to create an account with Google.",
+            "Cuenta no encontrada. Por favor regístrate primero, puedes usar la página de registro para crear una cuenta con Google.",
           );
         } else if (errorParam === "auth_failed") {
-          setError("Authentication failed. Please try again.");
+          setError("La autenticación falló. Por favor intenta de nuevo.");
         }
       } catch (error) {
         console.error("Error checking authentication:", error);
@@ -52,7 +52,7 @@ export default function LoginPage() {
         router.push("/dashboard");
       }
     } catch (err: any) {
-      setError(err.message || "Invalid email or password. Please try again.");
+      setError(err.message || "Correo electrónico o contraseña inválidos. Por favor intenta de nuevo.");
     } finally {
       setIsLoading(false);
     }
@@ -66,7 +66,7 @@ export default function LoginPage() {
       await signInWithGoogle(false);
       // The redirect will be handled by Supabase
     } catch (err: any) {
-      setError(err.message || "Google login failed. Please try again.");
+      setError(err.message || "El inicio de sesión con Google falló. Por favor intenta de nuevo.");
       setIsLoading(false);
     }
   };

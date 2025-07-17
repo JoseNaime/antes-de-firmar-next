@@ -138,11 +138,11 @@ export default function ProfilePage() {
     try {
       // Validate passwords
       if (passwordData.newPassword !== passwordData.confirmPassword) {
-        throw new Error("New passwords do not match");
+        throw new Error("Las contraseñas no coinciden");
       }
 
       if (passwordData.newPassword.length < 8) {
-        throw new Error("New password must be at least 8 characters long");
+        throw new Error("La nueva contraseña debe tener al menos 8 caracteres");
       }
 
       // Update password
@@ -154,7 +154,7 @@ export default function ProfilePage() {
 
       setMessage({
         type: "success",
-        text: "Password updated successfully!",
+        text: "¡Contraseña actualizada exitosamente!",
       });
 
       // Clear form
@@ -166,7 +166,7 @@ export default function ProfilePage() {
     } catch (error: any) {
       setMessage({
         type: "error",
-        text: error.message || "Failed to update password",
+        text: error.message || "Error al actualizar la contraseña",
       });
     } finally {
       setIsPasswordLoading(false);
@@ -185,12 +185,12 @@ export default function ProfilePage() {
       setDocumentCount(0);
       setMessage({
         type: "success",
-        text: "All documents and analysis data deleted successfully!",
+        text: "¡Todos los documentos y datos de análisis fueron eliminados exitosamente!",
       });
     } catch (error: any) {
       setMessage({
         type: "error",
-        text: error.message || "Failed to delete data",
+        text: error.message || "Error al eliminar los datos, puedes ir a la sección de documentos y eliminar los documentos uno por uno",
       });
     } finally {
       setIsDeleteDataLoading(false);
@@ -221,7 +221,7 @@ export default function ProfilePage() {
     } catch (error: any) {
       setMessage({
         type: "error",
-        text: error.message || "Failed to delete account",
+        text: error.message || "Error al eliminar la cuenta, contacta a soporte para eliminar tu cuenta",
       });
       setIsDeleteAccountLoading(false);
     }
@@ -238,7 +238,7 @@ export default function ProfilePage() {
 
     try {
       if (!user) {
-        throw new Error("User not authenticated");
+        throw new Error("Usuario no autenticado");
       }
 
       // Check if user already has a pending support ticket
@@ -256,7 +256,7 @@ export default function ProfilePage() {
       if (existingTickets && existingTickets.length > 0) {
         // User already has a pending ticket
         alert(
-          "You already have an active support ticket pending. We will review it promptly and reply to your ticket. If a new issue has occurred, when we reach out, you can add the additional information about the new issue.",
+          "Ya tienes una solicitud de soporte activa pendiente. La revisaremos y te responderemos por correo electrónico. Si ha ocurrido un nuevo problema, cuando nos comuniquemos contigo, podrás agregar la información adicional sobre el nuevo problema.",
         );
         setHelpDialogOpen(false);
         return;
@@ -281,11 +281,11 @@ export default function ProfilePage() {
 
       // Show success message
       alert(
-        "Thank you for contacting us! We have received your support request and will reach out to you via email regarding your concern. Our team typically responds within 24-48 hours.",
+        "¡Gracias por contactarnos! Hemos recibido tu solicitud de soporte y nos comunicaremos contigo por correo electrónico sobre tu consulta. Nuestro equipo típicamente responde dentro de 24-48horas.",
       );
     } catch (error: any) {
       console.error("Error submitting support request:", error);
-      alert("Failed to submit support request. Please try again.");
+      alert("Error al enviar la solicitud de soporte. Por favor, inténtalo de nuevo.");
     } finally {
       setIsSubmittingSupport(false);
     }
@@ -317,11 +317,11 @@ export default function ProfilePage() {
               <Link href="/dashboard">
                 <Button variant="ghost" size="sm">
                   <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Dashboard
+                  Dashboard
                 </Button>
               </Link>
               <div className="flex items-center gap-4">
-                <h1 className="text-2xl font-bold">Profile Settings</h1>
+                <h1 className="text-2xl font-bold">Configuración del Perfil</h1>
                 <div className="flex gap-2">
                   <Button
                     variant={activeTab === "profile" ? "default" : "outline"}
@@ -329,7 +329,7 @@ export default function ProfilePage() {
                     onClick={() => setActiveTab("profile")}
                   >
                     <User className="h-4 w-4 mr-2" />
-                    Profile
+                    Perfil
                   </Button>
                   <Button
                     variant={
@@ -339,7 +339,7 @@ export default function ProfilePage() {
                     onClick={() => setActiveTab("subscription")}
                   >
                     <CreditCard className="h-4 w-4 mr-2" />
-                    Subscription
+                    Suscripción
                   </Button>
                 </div>
               </div>
@@ -347,19 +347,19 @@ export default function ProfilePage() {
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm">
                     <HelpCircle className="h-4 w-4 mr-2" />
-                    Help
+                    Ayuda
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-md">
                   <DialogHeader>
-                    <DialogTitle>Contact Support</DialogTitle>
+                    <DialogTitle>Contactar Soporte</DialogTitle>
                   </DialogHeader>
                   <form onSubmit={handleSupportSubmit} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="subject">Subject</Label>
+                      <Label htmlFor="subject">Asunto</Label>
                       <Input
                         id="subject"
-                        placeholder="Brief description of your issue"
+                        placeholder="Breve descripción de tu problema"
                         value={supportForm.subject}
                         onChange={(e) =>
                           setSupportForm((prev) => ({
@@ -371,7 +371,7 @@ export default function ProfilePage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="priority">Priority</Label>
+                      <Label htmlFor="priority">Prioridad</Label>
                       <select
                         id="priority"
                         className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
@@ -383,17 +383,17 @@ export default function ProfilePage() {
                           }))
                         }
                       >
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                        <option value="urgent">Urgent</option>
+                        <option value="low">Baja</option>
+                        <option value="medium">Media</option>
+                        <option value="high">Alta</option>
+                        <option value="urgent">Urgente</option>
                       </select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="message">Message</Label>
+                      <Label htmlFor="message">Mensaje</Label>
                       <Textarea
                         id="message"
-                        placeholder="Please describe your issue or question in detail..."
+                        placeholder="Por favor describe tu problema o pregunta en detalle..."
                         value={supportForm.message}
                         onChange={(e) =>
                           setSupportForm((prev) => ({
@@ -411,11 +411,11 @@ export default function ProfilePage() {
                         variant="outline"
                         onClick={() => setHelpDialogOpen(false)}
                       >
-                        Cancel
+                        Cancelar
                       </Button>
                       <Button type="submit" disabled={isSubmittingSupport}>
                         <Send className="h-4 w-4 mr-2" />
-                        {isSubmittingSupport ? "Sending..." : "Send Request"}
+                        {isSubmittingSupport ? "Enviando..." : "Enviar Solicitud"}
                       </Button>
                     </div>
                   </form>
@@ -450,34 +450,37 @@ export default function ProfilePage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <User className="h-5 w-5" />
-                    Profile Information
+                    Información del Perfil
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">
-                        Name
+                        Nombre
                       </label>
                       <p className="text-lg">{user.name}</p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">
-                        Email
+                        Correo Electrónico
                       </label>
                       <p className="text-lg">{user.email}</p>
                     </div>
+                    {/*
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">
-                        Country
+                        País
                       </label>
                       <p className="text-lg">
-                        {user.country || "Not specified"}
+                        {user.country || "No especificado"}
                       </p>
                     </div>
+                    */}
+                    
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">
-                        Available Tokens
+                        Tokens Disponibles
                       </label>
                       <p className="text-lg font-semibold text-primary">
                         {user.tokens}
@@ -492,7 +495,7 @@ export default function ProfilePage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Lock className="h-5 w-5" />
-                    Password Settings
+                    Configuración de Contraseña
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -500,21 +503,21 @@ export default function ProfilePage() {
                     <Alert>
                       <Shield className="h-4 w-4" />
                       <AlertDescription>
-                        Your login is managed by your authentication provider
-                        (Google). Password changes must be done through your
-                        provider's account settings.
+                        Tu inicio de sesión es administrado por tu proveedor de autenticación
+                        (Google). Los cambios de contraseña deben realizarse a través de la
+                        configuración de cuenta de tu proveedor.
                       </AlertDescription>
                     </Alert>
                   ) : (
                     <form onSubmit={handlePasswordChange} className="space-y-4">
                       <div className="space-y-2">
                         <label className="text-sm font-medium">
-                          Current Password
+                          Contraseña Actual
                         </label>
                         <div className="relative">
                           <Input
                             type={showPasswords.current ? "text" : "password"}
-                            placeholder="Enter current password"
+                            placeholder="Ingresa tu contraseña actual"
                             value={passwordData.currentPassword}
                             onChange={(e) =>
                               setPasswordData((prev) => ({
@@ -546,12 +549,12 @@ export default function ProfilePage() {
 
                       <div className="space-y-2">
                         <label className="text-sm font-medium">
-                          New Password
+                          Nueva Contraseña
                         </label>
                         <div className="relative">
                           <Input
                             type={showPasswords.new ? "text" : "password"}
-                            placeholder="Enter new password"
+                            placeholder="Ingresa tu nueva contraseña"
                             value={passwordData.newPassword}
                             onChange={(e) =>
                               setPasswordData((prev) => ({
@@ -583,12 +586,12 @@ export default function ProfilePage() {
 
                       <div className="space-y-2">
                         <label className="text-sm font-medium">
-                          Confirm New Password
+                          Confirmar Nueva Contraseña
                         </label>
                         <div className="relative">
                           <Input
                             type={showPasswords.confirm ? "text" : "password"}
-                            placeholder="Confirm new password"
+                            placeholder="Confirma tu nueva contraseña"
                             value={passwordData.confirmPassword}
                             onChange={(e) =>
                               setPasswordData((prev) => ({
@@ -619,7 +622,7 @@ export default function ProfilePage() {
                       </div>
 
                       <Button type="submit" disabled={isPasswordLoading}>
-                        {isPasswordLoading ? "Updating..." : "Update Password"}
+                        {isPasswordLoading ? "Actualizando..." : "Actualizar Contraseña"}
                       </Button>
                     </form>
                   )}
@@ -634,7 +637,7 @@ export default function ProfilePage() {
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <CreditCard className="h-5 w-5" />
-                    Current Subscription
+                    Suscripción
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -663,13 +666,15 @@ export default function ProfilePage() {
                             <Crown className="h-4 w-4 text-purple-600" />
                           )}
                           <span className="font-semibold capitalize">
-                            {subscriptionData?.subscription_tier || "Freemium"}
-                          </span>
+                           {subscriptionData?.subscription_tier === "freemium" ? "Gratuito" :
+                             subscriptionData?.subscription_tier === "basic" ? "Básico" :
+                             subscriptionData?.subscription_tier === "advanced" ? "Avanzado" : "Gratuito"
+                             }</span>
                         </div>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-muted-foreground">
-                          Monthly Tokens
+                          Tokens Mensuales
                         </span>
                         <span className="font-semibold">
                           {subscriptionData?.subscription_benefits
@@ -679,7 +684,7 @@ export default function ProfilePage() {
                       {subscriptionData?.next_token_reward_at && (
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-muted-foreground">
-                            Next Charge
+                            Próximo Cargo
                           </span>
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -699,7 +704,7 @@ export default function ProfilePage() {
                             className="w-full"
                             onClick={() => setActiveTab("subscription")}
                           >
-                            Upgrade Plan
+                            Mejorar Plan
                           </Button>
                         </div>
                       )}
@@ -711,18 +716,18 @@ export default function ProfilePage() {
               {/* Account Stats */}
               <Card className="bg-white">
                 <CardHeader>
-                  <CardTitle className="text-lg">Account Overview</CardTitle>
+                  <CardTitle className="text-lg">Resumen de Cuenta</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">
-                      Documents Analyzed
+                      Documentos Analizados
                     </span>
                     <span className="font-semibold">{documentCount}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">
-                      Account Created
+                      Cuenta Creada
                     </span>
                     <span className="font-semibold">
                       {new Date(user.created_at).toLocaleDateString()}
@@ -734,7 +739,7 @@ export default function ProfilePage() {
               {/* Quick Actions */}
               <Card className="bg-white">
                 <CardHeader>
-                  <CardTitle className="text-lg">Quick Actions</CardTitle>
+                  <CardTitle className="text-lg">Acciones Rápidas</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {/* Delete Data */}
@@ -746,30 +751,30 @@ export default function ProfilePage() {
                         disabled={documentCount === 0}
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
-                        Delete All Documents ({documentCount})
+                        Eliminar Todos los Documentos ({documentCount})
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
                         <AlertDialogTitle>
-                          Delete All Documents?
+                          ¿Eliminar Todos los Documentos?
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                          This will permanently delete all {documentCount}{" "}
-                          documents and their analysis results. This action
-                          cannot be undone.
+                          Esto eliminará permanentemente todos los {documentCount}{" "}
+                          documentos y sus resultados de análisis. Esta acción
+                          no se puede deshacer y no se puede recuperar los tokens ni datos.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={handleDeleteData}
                           className="bg-orange-600 hover:bg-orange-700"
                           disabled={isDeleteDataLoading}
                         >
                           {isDeleteDataLoading
-                            ? "Deleting..."
-                            : "Delete All Data"}
+                            ? "Eliminando..."
+                            : "Eliminar Todos los Datos"}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -784,7 +789,7 @@ export default function ProfilePage() {
                     onClick={handleSignOut}
                   >
                     <LogOut className="h-4 w-4 mr-2" />
-                    Sign Out
+                    Cerrar Sesión
                   </Button>
 
                   <Separator />
@@ -797,28 +802,28 @@ export default function ProfilePage() {
                         className="w-full justify-start text-red-600 border-red-200 hover:bg-red-50"
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
-                        Delete Account
+                        Eliminar Cuenta
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Account?</AlertDialogTitle>
+                        <AlertDialogTitle>¿Eliminar Cuenta?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This will permanently delete your account and all
-                          associated data, including {documentCount} documents
-                          and analysis results. This action cannot be undone.
+                          Esto eliminará permanentemente tu cuenta y todos los
+                          datos asociados, incluyendo {documentCount} documentos
+                          y resultados de análisis. Esta acción no se puede deshacer.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={handleDeleteAccount}
                           className="bg-red-600 hover:bg-red-700"
                           disabled={isDeleteAccountLoading}
                         >
                           {isDeleteAccountLoading
-                            ? "Deleting..."
-                            : "Delete Account"}
+                            ? "Eliminando..."
+                            : "Eliminar Cuenta"}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>

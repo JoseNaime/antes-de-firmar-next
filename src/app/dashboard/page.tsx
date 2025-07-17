@@ -287,7 +287,7 @@ export default function Dashboard() {
       if (existingTickets && existingTickets.length > 0) {
         // User already has a pending ticket
         alert(
-          "You already have an active support ticket pending. We will review it promptly and reply to your ticket. If a new issue has occurred, when we reach out, you can add the additional information about the new issue.",
+          "Ya tienes una solicitud de soporte activa pendiente. La revisaremos prontamente y te responderemos por correo electrónico. Si ha ocurrido un nuevo problema, cuando nos comuniquemos contigo, podrás agregar la información adicional sobre el nuevo problema.",
         );
         setHelpDialogOpen(false);
         return;
@@ -312,11 +312,11 @@ export default function Dashboard() {
 
       // Show success message
       alert(
-        "Thank you for contacting us! We have received your support request and will reach out to you via email regarding your concern. Our team typically responds within 24-48 hours.",
+        "¡Gracias por contactarnos! Hemos recibido tu solicitud de soporte y nos comunicaremos contigo por correo electrónico sobre tu consulta. Nuestro equipo típicamente responde dentro de 24-48horas.",
       );
     } catch (error: any) {
       console.error("Error submitting support request:", error);
-      alert("Failed to submit support request. Please try again.");
+      alert("Error al enviar la solicitud de soporte. Por favor, inténtalo de nuevo.");
     } finally {
       setIsSubmittingSupport(false);
     }
@@ -331,13 +331,13 @@ export default function Dashboard() {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <FileText className="h-8 w-8 text-primary" />
-                <h1 className="text-2xl font-bold">Legal Document AI</h1>
+                <h1 className="text-2xl font-bold">Antes de Firmar</h1>
               </div>
             </div>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-4">
                 <span className="text-sm text-muted-foreground">
-                  Welcome, {user.name}
+                  Bienvenido, {user.name}
                 </span>
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full">
@@ -370,13 +370,16 @@ export default function Dashboard() {
                           <Zap className="h-4 w-4" />
                         )}
                         <span className="text-sm font-medium capitalize">
-                          {userSubscription?.subscription_tier || "freemium"}
+                          {userSubscription?.subscription_tier === "freemium" ? "Gratuito" :
+                           userSubscription?.subscription_tier === "basic" ? "Básico" :
+                           userSubscription?.subscription_tier === "advanced" ? "Avanzado" :
+                           "Gratuito"}
                         </span>
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                       <DialogHeader>
-                        <DialogTitle>Manage Your Subscription</DialogTitle>
+                        <DialogTitle>Gestiona tu Suscripción</DialogTitle>
                       </DialogHeader>
                       <SubscriptionPlans
                         userId={user.id}
@@ -394,19 +397,19 @@ export default function Dashboard() {
                   <DialogTrigger asChild>
                     <Button variant="outline" size="sm">
                       <HelpCircle className="h-4 w-4 mr-2" />
-                      Help
+                      Ayuda
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-md">
                     <DialogHeader>
-                      <DialogTitle>Contact Support</DialogTitle>
+                      <DialogTitle>Contactar Soporte</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleSupportSubmit} className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="subject">Subject</Label>
+                        <Label htmlFor="subject">Asunto</Label>
                         <Input
                           id="subject"
-                          placeholder="Brief description of your issue"
+                          placeholder="Breve descripción de tu problema"
                           value={supportForm.subject}
                           onChange={(e) =>
                             setSupportForm((prev) => ({
@@ -418,7 +421,7 @@ export default function Dashboard() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="priority">Priority</Label>
+                        <Label htmlFor="priority">Prioridad</Label>
                         <select
                           id="priority"
                           className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
@@ -430,17 +433,17 @@ export default function Dashboard() {
                             }))
                           }
                         >
-                          <option value="low">Low</option>
-                          <option value="medium">Medium</option>
-                          <option value="high">High</option>
-                          <option value="urgent">Urgent</option>
+                          <option value="low">Baja</option>
+                          <option value="medium">Media</option>
+                          <option value="high">Alta</option>
+                          <option value="urgent">Urgente</option>
                         </select>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="message">Message</Label>
+                        <Label htmlFor="message">Mensaje</Label>
                         <Textarea
                           id="message"
-                          placeholder="Please describe your issue or question in detail..."
+                          placeholder="Por favor describe tu problema o pregunta en detalle..."
                           value={supportForm.message}
                           onChange={(e) =>
                             setSupportForm((prev) => ({
@@ -458,11 +461,11 @@ export default function Dashboard() {
                           variant="outline"
                           onClick={() => setHelpDialogOpen(false)}
                         >
-                          Cancel
+                          Cancelar
                         </Button>
                         <Button type="submit" disabled={isSubmittingSupport}>
                           <Send className="h-4 w-4 mr-2" />
-                          {isSubmittingSupport ? "Sending..." : "Send Request"}
+                          {isSubmittingSupport ? "Enviando..." : "Enviar Solicitud"}
                         </Button>
                       </div>
                     </form>
@@ -471,13 +474,9 @@ export default function Dashboard() {
                 <Link href="/profile">
                   <Button variant="outline" size="sm">
                     <User className="h-4 w-4 mr-2" />
-                    Profile
+                    Perfil
                   </Button>
                 </Link>
-                <Button variant="outline" size="sm" onClick={handleSignOut}>
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Sign Out
-                </Button>
               </div>
             </div>
           </div>
@@ -492,7 +491,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
-                    Total Documents
+                    Total de Documentos
                   </p>
                   <p className="text-3xl font-bold">{documents.length}</p>
                 </div>
@@ -506,7 +505,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-green-600">
-                    Good Documents
+                    Documentos Buenos
                   </p>
                   <p className="text-3xl font-bold text-green-600">
                     {statusCounts.good}
@@ -524,7 +523,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-yellow-600">
-                    Concerning
+                    Preocupantes
                   </p>
                   <p className="text-3xl font-bold text-yellow-600">
                     {statusCounts.concerning}
@@ -542,7 +541,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-red-600">
-                    Problematic
+                    Problemáticos
                   </p>
                   <p className="text-3xl font-bold text-red-600">
                     {statusCounts.problematic}
@@ -564,7 +563,7 @@ export default function Dashboard() {
             variant={activeView === "upload" ? "default" : "outline"}
           >
             <Plus className="h-4 w-4" />
-            Upload New Document
+            Subir Documento
           </Button>
           <Button
             onClick={() => setActiveView("analysis")}
@@ -573,14 +572,14 @@ export default function Dashboard() {
             className="flex items-center gap-2"
           >
             <BarChart3 className="h-4 w-4" />
-            View Analysis
+            Ver Análisis
           </Button>
         </div>
 
         {/* Main Content Area */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-7 gap-8">
           {/* Document History Sidebar */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-2">
             <DocumentHistory
               documents={documents}
               onSelectDocument={handleSelectDocument}
@@ -602,15 +601,15 @@ export default function Dashboard() {
           </div>
 
           {/* Main Content */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-5">
             {activeView === "upload" ? (
               <div className="space-y-6">
                 <div className="text-center mb-6">
                   <h2 className="text-2xl font-semibold mb-2">
-                    Upload a New Document
+                    Subir un Nuevo Documento
                   </h2>
                   <p className="text-muted-foreground">
-                    Upload your legal document for AI-powered analysis
+                    Sube tu documento para análizarlo
                   </p>
                 </div>
                 <DocumentUpload
@@ -662,18 +661,18 @@ export default function Dashboard() {
                       <div className="text-center">
                         <BarChart3 className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                         <h3 className="text-xl font-medium mb-2">
-                          Select a Document
+                          Selecciona un Documento
                         </h3>
                         <p className="text-muted-foreground mb-6">
-                          Choose a document from your history to view its
-                          analysis results
+                          Elige un documento de tu historial para ver sus
+                          resultados de análisis
                         </p>
                         <Button
                           onClick={() => setActiveView("upload")}
                           variant="outline"
                         >
                           <Plus className="h-4 w-4 mr-2" />
-                          Upload New Document
+                          Subir Documento
                         </Button>
                       </div>
                     </CardContent>

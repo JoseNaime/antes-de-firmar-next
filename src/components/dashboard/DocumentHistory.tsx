@@ -94,7 +94,7 @@ const DocumentHistory = ({
             variant="outline"
             className="bg-green-100 text-green-800 border-green-300"
           >
-            Good
+            Bueno
           </Badge>
         );
       case "concerning":
@@ -103,7 +103,7 @@ const DocumentHistory = ({
             variant="outline"
             className="bg-yellow-100 text-yellow-800 border-yellow-300"
           >
-            Concerning
+            Preocupante
           </Badge>
         );
       case "problematic":
@@ -112,7 +112,7 @@ const DocumentHistory = ({
             variant="outline"
             className="bg-red-100 text-red-800 border-red-300"
           >
-            Problematic
+            Problemático
           </Badge>
         );
       case "analyzing":
@@ -121,7 +121,7 @@ const DocumentHistory = ({
             variant="outline"
             className="bg-blue-100 text-blue-800 border-blue-300"
           >
-            Analyzing
+            Analizando
           </Badge>
         );
       default:
@@ -132,7 +132,7 @@ const DocumentHistory = ({
   const formatDate = (dateString: string) => {
     if (!isMounted) return "";
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
+    return date.toLocaleDateString("es-ES", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -167,7 +167,7 @@ const DocumentHistory = ({
         <CardHeader className="pb-3">
           <CardTitle className="text-lg font-medium flex items-center gap-2">
             <Clock className="h-5 w-5 text-gray-500" />
-            Document History
+            Historial de Documentos
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -188,7 +188,7 @@ const DocumentHistory = ({
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-medium flex items-center gap-2">
             <Clock className="h-5 w-5 text-gray-500" />
-            Document History
+            Historial de Documentos
           </CardTitle>
           <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
@@ -198,24 +198,24 @@ const DocumentHistory = ({
                 className="flex items-center gap-2"
               >
                 <List className="h-4 w-4" />
-                View All
+                Ver Todos
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <File className="h-5 w-5" />
-                  All Documents ({documents.length})
+                  Todos los Documentos ({documents.length})
                 </DialogTitle>
               </DialogHeader>
               <div className="overflow-auto max-h-[60vh]">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Upload Date</TableHead>
-                      <TableHead>Actions</TableHead>
+                      <TableHead>Nombre</TableHead>
+                      <TableHead>Estado</TableHead>
+                      <TableHead>Fecha de Carga</TableHead>
+                      <TableHead>Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -226,7 +226,7 @@ const DocumentHistory = ({
                           className="text-center py-8 text-gray-500"
                         >
                           <File className="h-12 w-12 mx-auto mb-2 opacity-30" />
-                          <p>No documents found</p>
+                          <p>No hay documentos subidos</p>
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -260,8 +260,8 @@ const DocumentHistory = ({
                                 disabled={document.status === "analyzing"}
                               >
                                 {document.status === "analyzing"
-                                  ? "Processing..."
-                                  : "View"}
+                                  ? "Procesando..."
+                                  : "Ver"}
                               </Button>
                               <Button
                                 variant="outline"
@@ -296,7 +296,7 @@ const DocumentHistory = ({
             {documents.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <File className="h-12 w-12 mx-auto mb-2 opacity-30" />
-                <p>No documents in history</p>
+                <p>No hay documentos subidos</p>
               </div>
             ) : (
               documents.map((document) => (

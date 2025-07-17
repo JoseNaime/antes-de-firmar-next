@@ -1,1 +1,1 @@
-- [ ] Fix issue when the user changes subscription plan, the new stripe subscription is not being added to the database. Causing unpropper deactivation and creation of the subscription.
+- [ ] Fix issue when the user changes subscription plan, the new stripe subscription is not being added to the database. Causing unpropper deactivation and creation of the subscription.n
