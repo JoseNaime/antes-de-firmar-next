@@ -198,7 +198,6 @@ const DocumentHistory = ({
                 className="flex items-center gap-2"
               >
                 <List className="h-4 w-4" />
-                Ver Todos
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
@@ -292,7 +291,7 @@ const DocumentHistory = ({
       </CardHeader>
       <CardContent className="p-4 pt-0">
         <ScrollArea className="h-[400px]">
-          <div className="space-y-2 pr-4">
+          <div className="space-y-2">
             {documents.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <File className="h-12 w-12 mx-auto mb-2 opacity-30" />
