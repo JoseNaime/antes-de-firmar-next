@@ -294,10 +294,9 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse flex flex-col items-center">
-          <div className="h-16 w-16 rounded-full bg-muted mb-4"></div>
-          <div className="h-6 w-48 bg-muted rounded mb-4"></div>
-          <div className="h-4 w-64 bg-muted rounded"></div>
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-12 border-b-2 border-primary mb-4"></div>
+          <p className="text-lg font-medium text-muted-foreground">Obteniendo información...</p>
         </div>
       </div>
     );
@@ -642,10 +641,9 @@ export default function ProfilePage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {subscriptionLoading ? (
-                    <div className="animate-pulse space-y-3">
-                      <div className="h-4 bg-muted rounded w-3/4"></div>
-                      <div className="h-4 bg-muted rounded w-1/2"></div>
-                      <div className="h-4 bg-muted rounded w-2/3"></div>
+                    <div className="flex flex-col items-center justify-center py-4">
+                      <div className="animate-spin rounded-full h-8 border-b-2 border-primary mb-2"></div>
+                      <p className="text-sm text-muted-foreground">Obteniendo información...</p>
                     </div>
                   ) : (
                     <>

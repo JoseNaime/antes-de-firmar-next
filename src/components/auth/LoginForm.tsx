@@ -142,7 +142,14 @@ const LoginForm = ({
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Sign In"}
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-4 border-b-2 border-white mr-2"></div>
+                  Accediendo a la cuenta...
+                </div>
+              ) : (
+                "Sign In"
+              )}
             </Button>
           </form>
 
