@@ -205,6 +205,39 @@ export type Database = {
         }
         Relationships: []
       }
+      support_tickets: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          priority: string
+          status: Database["public"]["Enums"]["support_ticket_status"]
+          subject: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          priority?: string
+          status?: Database["public"]["Enums"]["support_ticket_status"]
+          subject: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          priority?: string
+          status?: Database["public"]["Enums"]["support_ticket_status"]
+          subject?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_subscriptions: {
         Row: {
           created_at: string | null
@@ -291,6 +324,7 @@ export type Database = {
     }
     Enums: {
       subscription_tier: "freemium" | "basic" | "advanced"
+      support_ticket_status: "pending" | "answered" | "invalid"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -419,6 +453,7 @@ export const Constants = {
   public: {
     Enums: {
       subscription_tier: ["freemium", "basic", "advanced"],
+      support_ticket_status: ["pending", "answered", "invalid"],
     },
   },
 } as const

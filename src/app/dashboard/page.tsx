@@ -6,6 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +28,8 @@ import {
   LogOut,
   Crown,
   Zap,
+  HelpCircle,
+  Send,
 } from "lucide-react";
 import DocumentUpload from "@/components/dashboard/DocumentUpload";
 import DocumentHistory from "@/components/dashboard/DocumentHistory";
@@ -33,6 +38,7 @@ import SubscriptionPlans from "@/components/subscription/SubscriptionPlans";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { getUserDocuments, getDocumentWithReview } from "@/lib/documents";
 import { getUserSubscription } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
 import type { Database } from "@/lib/supabase";
 
 type DocumentWithReview = Database["public"]["Tables"]["documents"]["Row"] & {
@@ -72,6 +78,13 @@ export default function Dashboard() {
   const [userSubscription, setUserSubscription] =
     useState<UserSubscription | null>(null);
   const [subscriptionDialogOpen, setSubscriptionDialogOpen] = useState(false);
+  const [helpDialogOpen, setHelpDialogOpen] = useState(false);
+  const [supportForm, setSupportForm] = useState({
+    subject: "",
+    message: "",
+    priority: "medium",
+  });
+  const [isSubmittingSupport, setIsSubmittingSupport] = useState(false);
 
   useEffect(() => {
     console.log(loading, user);
@@ -250,6 +263,65 @@ export default function Dashboard() {
     }
   };
 
+  const handleSupportSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmittingSupport(true);
+
+    try {
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
+      // Check if user already has a pending support ticket
+      const { data: existingTickets, error: checkError } = await supabase
+        .from("support_tickets")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("status", "pending")
+        .limit(1);
+
+      if (checkError) {
+        throw checkError;
+      }
+
+      if (existingTickets && existingTickets.length > 0) {
+        // User already has a pending ticket
+        alert(
+          "You already have an active support ticket pending. We will review it promptly and reply to your ticket. If a new issue has occurred, when we reach out, you can add the additional information about the new issue.",
+        );
+        setHelpDialogOpen(false);
+        return;
+      }
+
+      // Save support ticket to database
+      const { error } = await supabase.from("support_tickets").insert({
+        user_id: user.id,
+        subject: supportForm.subject,
+        message: supportForm.message,
+        priority: supportForm.priority,
+        status: "pending",
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // Reset form and close dialog
+      setSupportForm({ subject: "", message: "", priority: "medium" });
+      setHelpDialogOpen(false);
+
+      // Show success message
+      alert(
+        "Thank you for contacting us! We have received your support request and will reach out to you via email regarding your concern. Our team typically responds within 24-48 hours.",
+      );
+    } catch (error: any) {
+      console.error("Error submitting support request:", error);
+      alert("Failed to submit support request. Please try again.");
+    } finally {
+      setIsSubmittingSupport(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -318,6 +390,84 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                <Dialog open={helpDialogOpen} onOpenChange={setHelpDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <HelpCircle className="h-4 w-4 mr-2" />
+                      Help
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Contact Support</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleSupportSubmit} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="subject">Subject</Label>
+                        <Input
+                          id="subject"
+                          placeholder="Brief description of your issue"
+                          value={supportForm.subject}
+                          onChange={(e) =>
+                            setSupportForm((prev) => ({
+                              ...prev,
+                              subject: e.target.value,
+                            }))
+                          }
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="priority">Priority</Label>
+                        <select
+                          id="priority"
+                          className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                          value={supportForm.priority}
+                          onChange={(e) =>
+                            setSupportForm((prev) => ({
+                              ...prev,
+                              priority: e.target.value,
+                            }))
+                          }
+                        >
+                          <option value="low">Low</option>
+                          <option value="medium">Medium</option>
+                          <option value="high">High</option>
+                          <option value="urgent">Urgent</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="message">Message</Label>
+                        <Textarea
+                          id="message"
+                          placeholder="Please describe your issue or question in detail..."
+                          value={supportForm.message}
+                          onChange={(e) =>
+                            setSupportForm((prev) => ({
+                              ...prev,
+                              message: e.target.value,
+                            }))
+                          }
+                          rows={4}
+                          required
+                        />
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setHelpDialogOpen(false)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button type="submit" disabled={isSubmittingSupport}>
+                          <Send className="h-4 w-4 mr-2" />
+                          {isSubmittingSupport ? "Sending..." : "Send Request"}
+                        </Button>
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
                 <Link href="/profile">
                   <Button variant="outline" size="sm">
                     <User className="h-4 w-4 mr-2" />

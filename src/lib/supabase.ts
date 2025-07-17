@@ -151,6 +151,38 @@ export type Database = {
           updated_at?: string;
         };
       };
+      support_tickets: {
+        Row: {
+          id: string;
+          user_id: string;
+          subject: string;
+          message: string;
+          priority: string;
+          status: "pending" | "answered" | "invalid";
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          subject: string;
+          message: string;
+          priority?: string;
+          status?: "pending" | "answered" | "invalid";
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          subject?: string;
+          message?: string;
+          priority?: string;
+          status?: "pending" | "answered" | "invalid";
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
   };
 };
