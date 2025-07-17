@@ -87,8 +87,9 @@ export default function Dashboard() {
   const [isSubmittingSupport, setIsSubmittingSupport] = useState(false);
 
   useEffect(() => {
-    console.log(loading, user);
+    console.log("Dashboard useEffect - loading:", loading, "user:", user?.name);
     if (!loading && !user) {
+      console.log("Redirecting to login - no user and not loading");
       router.replace("/login");
     }
   }, [user, loading, router]);
@@ -98,6 +99,7 @@ export default function Dashboard() {
     const fetchData = async () => {
       if (!user) return;
 
+      console.log("Fetching user documents and subscription for user:", user.id);
       setLoadingDocuments(true);
       try {
         const [userDocuments, subscription] = await Promise.all([
@@ -126,6 +128,7 @@ export default function Dashboard() {
 
         setDocuments(transformedDocuments);
         setUserSubscription(subscription);
+        console.log("Documents and subscription loaded successfully");
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -141,7 +144,10 @@ export default function Dashboard() {
     router.push("/");
   };
 
+  console.log("Dashboard render - loading:", loading, "user:", user?.name, "loadingDocuments:", loadingDocuments);
+
   if (loading) {
+    console.log("Showing loading screen");
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-pulse flex flex-col items-center">
@@ -154,8 +160,11 @@ export default function Dashboard() {
   }
 
   if (!user) {
+    console.log("No user found, returning null");
     return null;
   }
+
+  console.log("Rendering dashboard with user:", user.name);
 
   const refreshDocuments = async () => {
     if (!user) return;

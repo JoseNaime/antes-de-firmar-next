@@ -73,6 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     try {
       console.log("Starting refreshUser method");
+      setLoading(true);
       const userData = await getCurrentUser();
       console.log("User data from getCurrentUser:", userData);
       setUser(userData);
@@ -80,16 +81,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error("Error refreshing user:", error);
       setUser(null);
     } finally {
+      console.log("Setting loading to false in refreshUser");
       setLoading(false);
     }
   };
 
   const signOut = async () => {
     try {
+      setLoading(true);
       await supabase.auth.signOut();
       setUser(null);
     } catch (error) {
       console.error("Error signing out:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -101,7 +106,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!isClient) return;
 
     // Initialize auth state
-    refreshUser();
+    const initializeAuth = async () => {
+      try {
+        console.log("Initializing auth state");
+        setLoading(true);
+        const userData = await getCurrentUser();
+        console.log("Initial user data:", userData);
+        setUser(userData);
+      } catch (error) {
+        console.error("Error initializing auth:", error);
+        setUser(null);
+      } finally {
+        console.log("Setting loading to false in initializeAuth");
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
 
     // Listen for auth changes
     const {
@@ -111,16 +132,88 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (event === "SIGNED_IN" && session?.user) {
         console.log("User signed in, refreshing user");
+        
+        // If user is already loaded and matches the session, just set loading to false
+        if (user?.id === session.user.id) {
+          console.log("User already loaded, just setting loading to false");
+          setLoading(false);
+          return;
+        }
+        
         setLoading(true);
-        await refreshUser();
+        
+        // Add timeout to prevent stuck loading state
+        const timeoutId = setTimeout(() => {
+          console.log("Timeout reached, forcing loading to false");
+          setLoading(false);
+        }, 10010); // 10 second timeout
+        
+        try {
+          console.log("About to call getCurrentUser in SIGNED_IN handler");
+          const userData = await getCurrentUser();
+          console.log("User data loaded in SIGNED_IN:", userData?.name);
+          clearTimeout(timeoutId);
+          
+          // Check if user data is the same as current user
+          if (userData?.id === user?.id) {
+            console.log("User data is the same, setting loading to false");
+            setLoading(false);
+          } else {
+            setUser(userData);
+            console.log("Setting loading to false after SIGNED_IN");
+            setLoading(false);
+          }
+        } catch (error) {
+          console.error("Error refreshing user on sign in:", error);
+          clearTimeout(timeoutId);
+          setUser(null);
+          console.log("Setting loading to false after SIGNED_IN error");
+          setLoading(false);
+        }
       } else if (event === "SIGNED_OUT" || !session) {
         console.log("User signed out or no session");
         setUser(null);
         setLoading(false);
       } else if (event === "TOKEN_REFRESHED" && session?.user) {
         console.log("Token refreshed, refreshing user");
+        
+        // If user is already loaded and matches the session, just set loading to false
+        if (user?.id === session.user.id) {
+          console.log("User already loaded, just setting loading to false");
+          setLoading(false);
+          return;
+        }
+        
         setLoading(true);
-        await refreshUser();
+        
+        // Add timeout to prevent stuck loading state
+        const timeoutId = setTimeout(() => {
+          console.log("Timeout reached, forcing loading to false");
+          setLoading(false);
+        }, 10010); // 10 second timeout
+        
+        try {
+          console.log("About to call getCurrentUser in TOKEN_REFRESHED handler");
+          const userData = await getCurrentUser();
+          console.log("User data loaded in TOKEN_REFRESHED:", userData?.name);
+          clearTimeout(timeoutId);
+          
+          // Check if user data is the same as current user
+          if (userData?.id === user?.id) {
+            console.log("User data is the same, setting loading to false");
+            setLoading(false);
+          } else {
+            setUser(userData);
+            console.log("Setting loading to false after TOKEN_REFRESHED");
+            setLoading(false);
+          }
+        } catch (error) {
+          console.error("Error refreshing user on token refresh:", error);
+          clearTimeout(timeoutId);
+          setUser(null);
+          console.log("Setting loading to false after TOKEN_REFRESHED error");
+          setLoading(false);
+        }
       }
     });
 
@@ -128,6 +221,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       subscription.unsubscribe();
     };
   }, [isClient]);
+
+  // Add a safety mechanism to prevent stuck loading state
+  useEffect(() => {
+    if (loading && user) {
+      console.log("Loading is true but user exists, forcing loading to false");
+      const timeoutId = setTimeout(() => {
+        setLoading(false);
+      }, 2000); // 2 second delay
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [loading, user]);
+
+  console.log("AuthProvider state - loading:", loading, "user:", user?.name);
 
   const value = {
     user,

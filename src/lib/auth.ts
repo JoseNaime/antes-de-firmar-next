@@ -2,7 +2,7 @@ import { supabase } from "./supabase";
 import type { Database } from "./supabase";
 
 type User = Database["public"]["Tables"]["users"]["Row"] & {
-  subscription_tier?: Database["public"]["Enums"]["subscription_tier"];
+  subscription_tier?: "freemium" | "basic" | "advanced";
   subscription_active?: boolean;
 };
 
@@ -160,6 +160,7 @@ export const signOut = async () => {
 
 export const getCurrentUser = async (): Promise<User | null> => {
   try {
+    console.log("getCurrentUser: Starting...");
     const {
       data: { session },
       error: sessionError,
@@ -188,13 +189,18 @@ export const getCurrentUser = async (): Promise<User | null> => {
       return null;
     }
 
+    console.log("User data fetched successfully:", userData?.name);
+
     // Get user subscription from user_subscriptions table
+    console.log("Fetching subscription data...");
     const { data: subscriptionData } = await supabase
       .from("user_subscriptions")
       .select("subscription_tier, is_active")
       .eq("user_id", session.user.id)
       .eq("is_active", true)
       .single();
+
+    console.log("Subscription data fetched:", subscriptionData);
 
     const userWithSubscription = {
       ...userData,
