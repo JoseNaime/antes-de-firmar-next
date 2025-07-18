@@ -148,9 +148,9 @@ const RegisterForm = ({
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-white">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Crear cuenta</CardTitle>
+          <CardTitle className="text-2xl font-bold">Crear Cuenta</CardTitle>
           <p className="text-muted-foreground">
-            Únete a AntesDeFirmar para comenzar a analizar tus documentos
+            Únete a GuardiaContrato para comenzar a analizar tus documentos
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -164,7 +164,7 @@ const RegisterForm = ({
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="name" className="text-sm font-medium">
-                Nombre completo
+                Nombre Completo
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -187,7 +187,7 @@ const RegisterForm = ({
 
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
-                Correo electrónico
+                Correo Electrónico
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />

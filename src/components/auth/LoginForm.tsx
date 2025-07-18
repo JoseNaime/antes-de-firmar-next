@@ -60,10 +60,10 @@ const LoginForm = ({
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-white">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Bienvenido de nuevo</CardTitle>
-          <p className="text-muted-foreground">
-            Inicia sesión con tu cuenta
-          </p>
+          <CardTitle className="text-2xl font-bold">
+            Bienvenido de Nuevo
+          </CardTitle>
+          <p className="text-muted-foreground">Inicia sesión en tu cuenta</p>
         </CardHeader>
         <CardContent className="space-y-4">
           {error && (
@@ -76,7 +76,7 @@ const LoginForm = ({
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
-                Correo electrónico
+                Correo Electrónico
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
