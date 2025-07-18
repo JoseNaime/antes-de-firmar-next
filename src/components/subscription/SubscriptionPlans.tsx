@@ -74,7 +74,7 @@ export default function SubscriptionPlans({
       setCurrentSubscription(subscriptionData);
     } catch (error) {
       console.error("Error loading subscription data:", error);
-      setError("Failed to load subscription plans");
+      setError("Error al cargar los planes de suscripción");
     } finally {
       setLoading(false);
     }
@@ -90,7 +90,7 @@ export default function SubscriptionPlans({
         data: { session },
       } = await supabase.auth.getSession();
       if (!session?.access_token) {
-        throw new Error("Please log in to cancel subscription");
+        throw new Error("Por favor, inicia sesión para cancelar la suscripción");
       }
 
       // Cancel subscription in Stripe first
@@ -106,7 +106,7 @@ export default function SubscriptionPlans({
 
       if (!stripeResponse.ok) {
         throw new Error(
-          stripeData.error || "Failed to cancel subscription in Stripe",
+          stripeData.error || "No se pudo cancelar la suscripción en Stripe",
         );
       }
 
@@ -135,7 +135,7 @@ export default function SubscriptionPlans({
       }
     } catch (error: any) {
       console.error("Cancel subscription error:", error);
-      setError(error.message || "Failed to cancel subscription");
+      setError(error.message || "No se pudo cancelar la suscripción");
     } finally {
       setCancellingSubscription(false);
     }
@@ -178,7 +178,7 @@ export default function SubscriptionPlans({
         data: { session },
       } = await supabase.auth.getSession();
       if (!session?.access_token) {
-        throw new Error("Please log in to subscribe");
+        throw new Error("Por favor, inicia sesión para suscribirte");
       }
 
       const response = await fetch("/api/stripe/checkout", {
@@ -195,12 +195,12 @@ export default function SubscriptionPlans({
       console.log("stripe response: ", data);
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to create checkout session");
+        throw new Error(data.error || "No se pudo crear la sesión de pago");
       }
 
       const stripe = await stripePromise;
       if (!stripe) {
-        throw new Error("Stripe failed to load");
+        throw new Error("Stripe no pudo cargar");
       }
 
       const { error } = await stripe.redirectToCheckout({
@@ -212,7 +212,7 @@ export default function SubscriptionPlans({
       }
     } catch (error: any) {
       console.error("Subscription error:", error);
-      setError(error.message || "Failed to start subscription process");
+      setError(error.message || "No se pudo iniciar el proceso de suscripción");
     } finally {
       setProcessingTier(null);
     }
@@ -251,13 +251,13 @@ export default function SubscriptionPlans({
   const getTierPrice = (tier: string) => {
     switch (tier) {
       case "freemium":
-        return "Free";
+        return "Gratis";
       case "basic":
-        return "$9.99/month";
+        return "$9.99/mes";
       case "advanced":
-        return "$29.99/month";
+        return "$29.99/mes";
       default:
-        return "Free";
+        return "Gratis";
     }
   };
 
@@ -270,8 +270,9 @@ export default function SubscriptionPlans({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="flex flex-col items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-12 border-b-2 border-primary mb-4"></div>
+        <p className="text-lg font-medium text-muted-foreground">Obteniendo información...</p>
       </div>
     );
   }
@@ -279,9 +280,9 @@ export default function SubscriptionPlans({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Subscription Plans</h2>
+        <h2 className="text-2xl font-bold mb-2">Planes de Suscripción</h2>
         <p className="text-muted-foreground">
-          Choose the plan that best fits your document analysis needs.
+          Elige el plan que mejor se adapte a tus necesidades de análisis de documentos.
         </p>
       </div>
 
@@ -304,7 +305,7 @@ export default function SubscriptionPlans({
           >
             {isCurrentTier(benefit.tier) && (
               <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-primary">
-                Current Plan
+                Plan Actual
               </Badge>
             )}
 
@@ -325,7 +326,7 @@ export default function SubscriptionPlans({
                 <div className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-green-600" />
                   <span className="text-sm">
-                    {benefit.monthly_tokens} tokens/month
+                    {benefit.monthly_tokens} tokens/mes
                   </span>
                 </div>
 
@@ -333,8 +334,8 @@ export default function SubscriptionPlans({
                   <Check className="h-4 w-4 text-green-600" />
                   <span className="text-sm">
                     {benefit.upload_limit
-                      ? `${benefit.upload_limit} file uploads`
-                      : "Unlimited file uploads"}
+                      ? `${benefit.upload_limit} subidas de archivos`
+                      : "Subidas de archivos ilimitadas"}
                   </span>
                 </div>
 
@@ -342,15 +343,15 @@ export default function SubscriptionPlans({
                   <Check className="h-4 w-4 text-green-600" />
                   <span className="text-sm">
                     {benefit.human_review_access
-                      ? "Human review access"
-                      : "AI review only"}
+                      ? "Acceso a revisión humana"
+                      : "Revisión solo por IA"}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-green-600" />
                   <span className="text-sm capitalize">
-                    {benefit.support_prioritization} support
+                    {benefit.support_prioritization} soporte
                   </span>
                 </div>
 
@@ -358,8 +359,7 @@ export default function SubscriptionPlans({
                   <div className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-600" />
                     <span className="text-sm">
-                      {benefit.token_purchase_discount}% discount on token
-                      purchases
+                      {benefit.token_purchase_discount}% descuento en compras de tokens
                     </span>
                   </div>
                 )}
@@ -369,48 +369,47 @@ export default function SubscriptionPlans({
                 {benefit.tier === "freemium" ? (
                   isCurrentTier(benefit.tier) ? (
                     <Button variant="outline" className="w-full" disabled>
-                      Current Plan
+                      Plan Actual
                     </Button>
                   ) : currentSubscription && !isCurrentTier(benefit.tier) ? (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button variant="destructive" className="w-full">
-                          Cancel Subscription
+                          Cancelar Suscripción
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
                           <AlertDialogTitle>
-                            Cancel Subscription
+                            Cancelar Suscripción
                           </AlertDialogTitle>
                           <AlertDialogDescription>
-                            Are you sure you want to cancel your subscription
-                            and downgrade to the Freemium plan?
+                            ¿Estás seguro de que quieres cancelar tu suscripción y bajar al plan Gratuito?
                             <br />
                             <br />
-                            <strong>You will lose:</strong>
+                            <strong>Perderás:</strong>
                             <ul className="list-disc list-inside mt-2 space-y-1">
                               <li>
-                                Your current{" "}
+                                Tus tokens actuales de{" "}
                                 {
                                   currentSubscription?.subscription_benefits
                                     .monthly_tokens
                                 }{" "}
-                                tokens/month (reduced to{" "}
+                                tokens/mes (reducidos a{" "}
                                 {benefits.find((b) => b.tier === "freemium")
                                   ?.monthly_tokens || 50}{" "}
-                                tokens/month)
+                                tokens/mes)
                               </li>
                               <li>
                                 {currentSubscription?.subscription_benefits
                                   .human_review_access
-                                  ? "Human review access"
+                                  ? "Acceso a revisión humana"
                                   : ""}
                               </li>
                               <li>
                                 {currentSubscription?.subscription_benefits
                                   .support_prioritization !== "no"
-                                  ? `${currentSubscription?.subscription_benefits.support_prioritization} support (downgraded to standard support)`
+                                  ? `${currentSubscription?.subscription_benefits.support_prioritization} soporte (bajado a soporte estándar)`
                                   : ""}
                               </li>
                               {currentSubscription?.subscription_benefits
@@ -420,16 +419,16 @@ export default function SubscriptionPlans({
                                     currentSubscription?.subscription_benefits
                                       .token_purchase_discount
                                   }
-                                  % discount on token purchases
+                                  % descuento en compras de tokens
                                 </li>
                               )}
                               {!currentSubscription?.subscription_benefits
                                 .upload_limit && (
                                 <li>
-                                  Unlimited file uploads (limited to{" "}
+                                  Subidas de archivos ilimitadas (limitadas a{" "}
                                   {benefits.find((b) => b.tier === "freemium")
                                     ?.upload_limit || 3}{" "}
-                                  files)
+                                  archivos)
                                 </li>
                               )}
                             </ul>
@@ -437,7 +436,7 @@ export default function SubscriptionPlans({
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>
-                            Keep Subscription
+                            Mantener Suscripción
                           </AlertDialogCancel>
                           <AlertDialogAction
                             onClick={handleCancelSubscription}
@@ -447,10 +446,10 @@ export default function SubscriptionPlans({
                             {cancellingSubscription ? (
                               <>
                                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                Cancelling...
+                                Cancelando...
                               </>
                             ) : (
-                              "Yes, Cancel Subscription"
+                              "Sí, Cancelar Suscripción"
                             )}
                           </AlertDialogAction>
                         </AlertDialogFooter>
@@ -458,12 +457,12 @@ export default function SubscriptionPlans({
                     </AlertDialog>
                   ) : (
                     <Button variant="outline" className="w-full" disabled>
-                      Free Plan
+                      Plan Gratuito
                     </Button>
                   )
                 ) : isCurrentTier(benefit.tier) ? (
                   <Button variant="outline" className="w-full" disabled>
-                    Current Plan
+                    Plan Actual
                   </Button>
                 ) : isLowerTier(benefit.tier) ? (
                   <AlertDialog>
@@ -476,36 +475,33 @@ export default function SubscriptionPlans({
                         {processingTier === benefit.tier ? (
                           <>
                             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Processing...
+                            Procesando...
                           </>
                         ) : (
-                          "Downgrade Plan"
+                          "Bajar Plan"
                         )}
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
                         <AlertDialogTitle>
-                          Downgrade Subscription Plan
+                          Bajar Plan de Suscripción
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                          You are about to downgrade your subscription from{" "}
+                          Vas a bajar tu suscripción de{" "}
                           <strong className="capitalize">
                             {currentSubscription?.subscription_tier}
                           </strong>{" "}
-                          to{" "}
+                          a{" "}
                           <strong className="capitalize">{benefit.tier}</strong>
                           .
                           <br />
                           <br />
-                          <strong>Warning:</strong> All current benefits and
-                          unused tokens will be lost and reset to the lower
-                          plan&apos;s limits. You will lose access to premium
-                          features included in your current plan.
+                          <strong>Advertencia:</strong> Todos los beneficios actuales y tokens no utilizados se perderán y se resetearán a los límites del plan inferior. Perderás acceso a las funciones premium incluidas en tu plan actual.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Keep Current Plan</AlertDialogCancel>
+                        <AlertDialogCancel>Mantener Plan Actual</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() =>
                             confirmSubscriptionChange(
@@ -514,7 +510,7 @@ export default function SubscriptionPlans({
                           }
                           className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
-                          Confirm Downgrade
+                          Confirmar Bajar
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -529,51 +525,47 @@ export default function SubscriptionPlans({
                         {processingTier === benefit.tier ? (
                           <>
                             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Processing...
+                            Procesando...
                           </>
                         ) : (
-                          "Subscribe"
+                          "Suscribirse"
                         )}
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
                         <AlertDialogTitle>
-                          Change Subscription Plan
+                          Cambiar Plan de Suscripción
                         </AlertDialogTitle>
                         <AlertDialogDescription>
                           {currentSubscription ? (
                             <>
-                              You are about to change your subscription from{" "}
+                              Vas a cambiar tu suscripción de{" "}
                               <strong className="capitalize">
                                 {currentSubscription.subscription_tier}
                               </strong>{" "}
-                              to{" "}
+                              a{" "}
                               <strong className="capitalize">
                                 {benefit.tier}
                               </strong>
                               .
                               <br />
                               <br />
-                              <strong>Important:</strong> All current benefits
-                              and unused tokens will be lost and reset based on
-                              your new plan. This change will take effect
-                              immediately.
+                              <strong>Importante:</strong> Todos los beneficios actuales y tokens no utilizados se perderán y se resetearán según tu nuevo plan. Este cambio tendrá efecto inmediatamente.
                             </>
                           ) : (
                             <>
-                              You are about to subscribe to the{" "}
+                              Vas a suscribirte al{" "}
                               <strong className="capitalize">
                                 {benefit.tier}
                               </strong>{" "}
-                              plan. Your benefits and tokens will be set
-                              according to this plan.
+                              plan. Tus beneficios y tokens se establecerán según este plan.
                             </>
                           )}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() =>
                             confirmSubscriptionChange(
@@ -581,7 +573,7 @@ export default function SubscriptionPlans({
                             )
                           }
                         >
-                          Continue with Subscription
+                          Continuar con Suscripción
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -595,8 +587,7 @@ export default function SubscriptionPlans({
 
       <div className="text-center text-sm text-muted-foreground">
         <p>
-          All subscriptions are billed monthly and can be canceled at any time.
-          Tokens are awarded at the beginning of each billing cycle.
+          Todas las suscripciones se cobran mensualmente y pueden cancelarse en cualquier momento. Los tokens se otorgan al inicio de cada ciclo de facturación.
         </p>
       </div>
     </div>

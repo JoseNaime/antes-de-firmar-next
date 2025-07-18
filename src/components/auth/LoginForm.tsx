@@ -34,15 +34,15 @@ const LoginForm = ({
     const errors: { email?: string; password?: string } = {};
 
     if (!email) {
-      errors.email = "Email is required";
+      errors.email = "El correo electrónico es requerido";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      errors.email = "Please enter a valid email address";
+      errors.email = "Por favor ingresa una dirección de correo válida";
     }
 
     if (!password) {
-      errors.password = "Password is required";
+      errors.password = "La contraseña es requerida";
     } else if (password.length < 6) {
-      errors.password = "Password must be at least 6 characters";
+      errors.password = "La contraseña debe tener al menos 6 caracteres";
     }
 
     setValidationErrors(errors);
@@ -60,9 +60,9 @@ const LoginForm = ({
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-white">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
+          <CardTitle className="text-2xl font-bold">Bienvenido de nuevo</CardTitle>
           <p className="text-muted-foreground">
-            Sign in to your Legal Document AI account
+            Inicia sesión con tu cuenta
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -76,14 +76,14 @@ const LoginForm = ({
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
-                Email
+                Correo electrónico
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder="Ingresa tu correo electrónico"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className={`pl-10 ${validationErrors.email ? "border-destructive" : ""}`}
@@ -99,14 +99,14 @@ const LoginForm = ({
 
             <div className="space-y-2">
               <label htmlFor="password" className="text-sm font-medium">
-                Password
+                Contraseña
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
+                  placeholder="Ingresa tu contraseña"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className={`pl-10 pr-10 ${validationErrors.password ? "border-destructive" : ""}`}
@@ -137,7 +137,7 @@ const LoginForm = ({
                 href="/forgot-password"
                 className="text-sm text-primary hover:underline"
               >
-                Forgot password?
+                ¿Olvidaste tu contraseña?
               </Link>
             </div>
 
@@ -148,7 +148,7 @@ const LoginForm = ({
                   Accediendo a la cuenta...
                 </div>
               ) : (
-                "Sign In"
+                "Iniciar sesión"
               )}
             </Button>
           </form>
@@ -159,7 +159,7 @@ const LoginForm = ({
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-background px-2 text-muted-foreground">
-                Or continue with
+                O continúa con
               </span>
             </div>
           </div>
@@ -188,15 +188,15 @@ const LoginForm = ({
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            Continue with Google
+            Continuar con Google
           </Button>
 
           <div className="text-center text-sm">
             <span className="text-muted-foreground">
-              Don&apos;t have an account?{" "}
+              No tienes una cuenta?{" "}
             </span>
             <Link href="/register" className="text-primary hover:underline">
-              Sign up
+              Regístrate
             </Link>
           </div>
         </CardContent>

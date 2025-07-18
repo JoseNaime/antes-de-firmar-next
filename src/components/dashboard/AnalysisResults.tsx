@@ -87,10 +87,9 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({
     return (
       <div className="flex flex-col items-center justify-center h-[600px] bg-background">
         <FileText className="h-16 w-16 text-muted-foreground mb-4" />
-        <h3 className="text-xl font-medium mb-2">No Document Selected</h3>
+        <h3 className="text-xl font-medium mb-2">No se ha seleccionado ningún documento</h3>
         <p className="text-muted-foreground text-center max-w-md">
-          Upload a document or select one from your history to see analysis
-          results.
+          Sube un documento o selecciona uno de tu historial para ver los resultados del análisis.
         </p>
       </div>
     );
@@ -101,10 +100,9 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({
     return (
       <div className="flex flex-col items-center justify-center h-[600px] bg-background">
         <AlertCircle className="h-16 w-16 text-muted-foreground mb-4" />
-        <h3 className="text-xl font-medium mb-2">No Analysis Available</h3>
+        <h3 className="text-xl font-medium mb-2">No hay análisis disponible</h3>
         <p className="text-muted-foreground text-center max-w-md">
-          This document hasn't been analyzed yet or the analysis is still
-          processing.
+          Este documento aún no ha sido analizado o el análisis aún está en proceso.
         </p>
       </div>
     );
@@ -117,7 +115,7 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({
         <div className="flex flex-col items-center space-y-4">
           <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-300 border-t-primary"></div>
           <p className="text-lg font-medium text-muted-foreground animate-pulse">
-            Analyzing document...
+            Analizando documento...
           </p>
           <div className="flex space-x-1">
             <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
@@ -140,10 +138,9 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({
     return (
       <div className="flex flex-col items-center justify-center h-[600px] bg-background">
         <AlertCircle className="h-16 w-16 text-destructive mb-4" />
-        <h3 className="text-xl font-medium mb-2">Analysis Error</h3>
+        <h3 className="text-xl font-medium mb-2">Error en el análisis</h3>
         <p className="text-muted-foreground text-center max-w-md">
-          There was an error analyzing this document. Please try uploading it
-          again.
+          Hubo un error al analizar este documento. Por favor intenta subirlo nuevamente.
         </p>
       </div>
     );
@@ -159,7 +156,7 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({
               <div>
                 <CardTitle className="text-2xl">{document.name}</CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Uploaded on {document.uploadDate}
+                  Subido el {document.uploadDate}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -167,7 +164,7 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({
                 {analysis?.id && (
                   <div className="flex items-center gap-1 mr-4">
                     <span className="text-sm text-muted-foreground mr-2">
-                      Rate this analysis:
+                      Califica este análisis:
                     </span>
                     <Button
                       variant={
@@ -203,10 +200,12 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({
                     </Button>
                   </div>
                 )}
+                {/*}
                 <Button variant="outline" size="sm">
                   <Download className="h-4 w-4 mr-2" />
-                  Download Report
+                  Descargar informe
                 </Button>
+                */}
               </div>
             </div>
           </CardHeader>
@@ -217,9 +216,9 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({
               className="w-full"
             >
               <TabsList className="grid grid-cols-4 mb-6">
-                <TabsTrigger value="summary">Summary</TabsTrigger>
+                <TabsTrigger value="summary">Resumen</TabsTrigger>
                 <TabsTrigger value="good">
-                  Good
+                  Bueno
                   <Badge
                     variant="outline"
                     className="ml-2 bg-green-50 text-green-700 border-green-200"
@@ -228,7 +227,7 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({
                   </Badge>
                 </TabsTrigger>
                 <TabsTrigger value="concerning">
-                  Concerning
+                  Preocupante
                   <Badge
                     variant="outline"
                     className="ml-2 bg-yellow-50 text-yellow-700 border-yellow-200"
@@ -237,7 +236,7 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({
                   </Badge>
                 </TabsTrigger>
                 <TabsTrigger value="problematic">
-                  Problematic
+                  Problematico
                   <Badge
                     variant="outline"
                     className="ml-2 bg-red-50 text-red-700 border-red-200"
@@ -249,12 +248,12 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({
 
               <TabsContent value="summary" className="space-y-4">
                 <div className="p-4 rounded-lg border bg-card">
-                  <h3 className="font-medium mb-2">Document Summary</h3>
+                  <h3 className="font-medium mb-2">Resumen del documento</h3>
                   <p className="text-muted-foreground">{analysis?.summary}</p>
                 </div>
 
                 <div className="p-4 rounded-lg border bg-card">
-                  <h3 className="font-medium mb-2">Legal Implications</h3>
+                  <h3 className="font-medium mb-2">Implicaciones legales</h3>
                   <p className="text-muted-foreground">
                     {analysis?.legalImplications}
                   </p>
@@ -265,11 +264,10 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({
                     <CardContent className="pt-6">
                       <div className="flex items-center">
                         <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
-                        <h3 className="font-medium">Good Clauses</h3>
+                        <h3 className="font-medium">Cláusulas buenas</h3>
                       </div>
                       <p className="text-sm mt-2">
-                        {analysis?.goodClauses.length} clauses that provide fair
-                        terms
+                        {analysis?.goodClauses.length} cláusulas que proporcionan términos justos
                       </p>
                     </CardContent>
                   </Card>
@@ -278,11 +276,10 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({
                     <CardContent className="pt-6">
                       <div className="flex items-center">
                         <AlertTriangle className="h-5 w-5 text-yellow-600 mr-2" />
-                        <h3 className="font-medium">Concerning Clauses</h3>
+                        <h3 className="font-medium">Cláusulas preocupantes</h3>
                       </div>
                       <p className="text-sm mt-2">
-                        {analysis?.concerningClauses.length} clauses that may
-                        need attention
+                        {analysis?.concerningClauses.length} cláusulas que pueden necesitar atención
                       </p>
                     </CardContent>
                   </Card>
@@ -291,11 +288,10 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({
                     <CardContent className="pt-6">
                       <div className="flex items-center">
                         <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
-                        <h3 className="font-medium">Problematic Clauses</h3>
+                        <h3 className="font-medium">Cláusulas problemáticas</h3>
                       </div>
                       <p className="text-sm mt-2">
-                        {analysis?.problematicClauses.length} clauses with
-                        significant issues
+                        {analysis?.problematicClauses.length} cláusulas con problemas significativos
                       </p>
                     </CardContent>
                   </Card>

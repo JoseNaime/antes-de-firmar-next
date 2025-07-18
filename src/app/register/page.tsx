@@ -25,7 +25,7 @@ export default function RegisterPage() {
         // Check for error parameters
         const errorParam = searchParams.get("error");
         if (errorParam === "registration_failed") {
-          setError("Registration failed. Please try again.");
+          setError("El registro falló. Por favor intenta de nuevo.");
         }
       } catch (error) {
         console.error("Error checking authentication:", error);
@@ -43,7 +43,7 @@ export default function RegisterPage() {
     name: string;
     country: string;
   }) => {
-    setError("Direct registration is disabled. Please use Google to register.");
+    setError("El registro directo está deshabilitado. Por favor usa Google para registrarte.");
     return;
   };
 
@@ -55,7 +55,7 @@ export default function RegisterPage() {
       await signInWithGoogle(true);
       // The redirect will be handled by Supabase
     } catch (err: any) {
-      setError(err.message || "Google registration failed. Please try again.");
+      setError(err.message || "El registro con Google falló. Por favor intenta de nuevo.");
       setIsLoading(false);
     }
   };

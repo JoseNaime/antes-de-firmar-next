@@ -90,34 +90,34 @@ const RegisterForm = ({
     const errors: { [key: string]: string } = {};
 
     if (!formData.name.trim()) {
-      errors.name = "Name is required";
-    } else if (formData.name.trim().length < 2) {
-      errors.name = "Name must be at least 2 characters";
+      errors.name = "El nombre es requerido";
+    } else if (formData.name.trim().length < 3) {
+      errors.name = "El nombre debe tener al menos 3 caracteres";
     }
 
     if (!formData.email) {
-      errors.email = "Email is required";
+      errors.email = "El correo electrónico es requerido";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = "Please enter a valid email address";
+      errors.email = "Por favor ingresa una dirección de correo válida";
     }
 
     if (!formData.password) {
-      errors.password = "Password is required";
+      errors.password = "La contraseña es requerida";
     } else if (formData.password.length < 8) {
-      errors.password = "Password must be at least 8 characters";
+      errors.password = "La contraseña debe tener al menos 8 caracteres";
     } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
       errors.password =
-        "Password must contain at least one uppercase letter, one lowercase letter, and one number";
+        "La contraseña debe contener al menos una letra mayúscula, una minúscula y un número";
     }
 
     if (!formData.confirmPassword) {
-      errors.confirmPassword = "Please confirm your password";
+      errors.confirmPassword = "Por favor confirma tu contraseña";
     } else if (formData.password !== formData.confirmPassword) {
-      errors.confirmPassword = "Passwords do not match";
+      errors.confirmPassword = "Las contraseñas no coinciden";
     }
 
     if (!formData.country) {
-      errors.country = "Country is required";
+      errors.country = "El país es requerido";
     }
 
     setValidationErrors(errors);
@@ -148,9 +148,9 @@ const RegisterForm = ({
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-white">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
+          <CardTitle className="text-2xl font-bold">Crear cuenta</CardTitle>
           <p className="text-muted-foreground">
-            Join Legal Document AI to start analyzing your documents
+            Únete a AntesDeFirmar para comenzar a analizar tus documentos
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -164,14 +164,14 @@ const RegisterForm = ({
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="name" className="text-sm font-medium">
-                Full Name
+                Nombre completo
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="name"
                   type="text"
-                  placeholder="Enter your full name"
+                  placeholder="Ingresa tu nombre completo"
                   value={formData.name}
                   onChange={(e) => handleInputChange("name", e.target.value)}
                   className={`pl-10 ${validationErrors.name ? "border-destructive" : ""}`}
@@ -187,14 +187,14 @@ const RegisterForm = ({
 
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
-                Email
+                Correo electrónico
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder="Ingresa tu correo electrónico"
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
                   className={`pl-10 ${validationErrors.email ? "border-destructive" : ""}`}
@@ -210,7 +210,7 @@ const RegisterForm = ({
 
             <div className="space-y-2">
               <label htmlFor="country" className="text-sm font-medium">
-                Country
+                País
               </label>
               <div className="relative">
                 <Globe className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
@@ -222,7 +222,7 @@ const RegisterForm = ({
                   <SelectTrigger
                     className={`pl-10 ${validationErrors.country ? "border-destructive" : ""}`}
                   >
-                    <SelectValue placeholder="Select your country" />
+                    <SelectValue placeholder="Selecciona tu país" />
                   </SelectTrigger>
                   <SelectContent>
                     {countries.map((country) => (
@@ -242,14 +242,14 @@ const RegisterForm = ({
 
             <div className="space-y-2">
               <label htmlFor="password" className="text-sm font-medium">
-                Password
+                Contraseña
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Create a password"
+                  placeholder="Crea una contraseña segura"
                   value={formData.password}
                   onChange={(e) =>
                     handleInputChange("password", e.target.value)
@@ -279,14 +279,14 @@ const RegisterForm = ({
 
             <div className="space-y-2">
               <label htmlFor="confirmPassword" className="text-sm font-medium">
-                Confirm Password
+                Confirmar contraseña
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Confirm your password"
+                  placeholder="Confirma tu contraseña"
                   value={formData.confirmPassword}
                   onChange={(e) =>
                     handleInputChange("confirmPassword", e.target.value)
@@ -315,7 +315,7 @@ const RegisterForm = ({
             </div>
 
             <Button type="submit" className="w-full" disabled={true}>
-              Direct Registration Disabled
+              Registro directo deshabilitado
             </Button>
           </form>
 
@@ -325,7 +325,7 @@ const RegisterForm = ({
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-background px-2 text-muted-foreground">
-                Register with
+                Regístrate con
               </span>
             </div>
           </div>
@@ -354,15 +354,15 @@ const RegisterForm = ({
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            Continue with Google
+            Continuar con Google
           </Button>
 
           <div className="text-center text-sm">
             <span className="text-muted-foreground">
-              Already have an account?{" "}
+              ¿Ya tienes una cuenta?{" "}
             </span>
             <Link href="/login" className="text-primary hover:underline">
-              Sign in
+              Iniciar sesión
             </Link>
           </div>
         </CardContent>

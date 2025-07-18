@@ -281,7 +281,7 @@ export default function Dashboard() {
 
     try {
       if (!user) {
-        throw new Error("User not authenticated");
+        throw new Error("Usuario no autenticado");
       }
 
       // Check if user already has a pending support ticket

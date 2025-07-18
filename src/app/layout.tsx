@@ -8,9 +8,9 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Legal Document AI - AI-Powered Document Analysis",
+  title: "Antes De Firmar - Análisis de Documentos con IA",
   description:
-    "Upload legal documents and get instant AI analysis to identify potential flaws before signing.",
+    "Sube documentos legales y obtén análisis instantáneo para identificar posibles fallas antes de firmar.",
 };
 
 export default function RootLayout({
@@ -19,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="es" suppressHydrationWarning>
       <Script src="https://api.tempolabs.ai/proxy-asset?url=https://storage.googleapis.com/tempo-public-assets/error-handling.js" />
       <body className={inter.className} suppressHydrationWarning>
         <AuthProvider>
