@@ -6,12 +6,7 @@ type User = Database["public"]["Tables"]["users"]["Row"] & {
   subscription_active?: boolean;
 };
 
-export const signUp = async (
-  email: string,
-  password: string,
-  name: string,
-  country?: string,
-) => {
+export const signUp = async (email: string, password: string, name: string) => {
   let authUserId: string | null = null;
 
   try {
@@ -33,7 +28,6 @@ export const signUp = async (
           id: authData.user.id,
           email,
           name,
-          country: country || null,
           tokens: 50, // Default tokens for freemium users
         })
         .select()

@@ -6,22 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Eye,
-  EyeOff,
-  Mail,
-  Lock,
-  User,
-  Globe,
-  AlertCircle,
-} from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, AlertCircle } from "lucide-react";
 import Link from "next/link";
 
 interface RegisterFormProps {
@@ -29,43 +14,11 @@ interface RegisterFormProps {
     email: string;
     password: string;
     name: string;
-    country: string;
   }) => void;
   onGoogleRegister?: () => void;
   isLoading?: boolean;
   error?: string;
 }
-
-const countries = [
-  "United States",
-  "United Kingdom",
-  "Canada",
-  "Australia",
-  "Germany",
-  "France",
-  "Spain",
-  "Italy",
-  "Netherlands",
-  "Sweden",
-  "Norway",
-  "Denmark",
-  "Finland",
-  "Switzerland",
-  "Austria",
-  "Belgium",
-  "Ireland",
-  "Portugal",
-  "Japan",
-  "South Korea",
-  "Singapore",
-  "New Zealand",
-  "Brazil",
-  "Mexico",
-  "Argentina",
-  "Chile",
-  "India",
-  "Other",
-];
 
 const RegisterForm = ({
   onRegister = () => {},
@@ -78,7 +31,6 @@ const RegisterForm = ({
     password: "",
     confirmPassword: "",
     name: "",
-    country: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -116,10 +68,6 @@ const RegisterForm = ({
       errors.confirmPassword = "Las contraseñas no coinciden";
     }
 
-    if (!formData.country) {
-      errors.country = "El país es requerido";
-    }
-
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -131,7 +79,6 @@ const RegisterForm = ({
         email: formData.email,
         password: formData.password,
         name: formData.name,
-        country: formData.country,
       });
     }
   };
@@ -204,38 +151,6 @@ const RegisterForm = ({
               {validationErrors.email && (
                 <p className="text-sm text-destructive">
                   {validationErrors.email}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="country" className="text-sm font-medium">
-                País
-              </label>
-              <div className="relative">
-                <Globe className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
-                <Select
-                  value={formData.country}
-                  onValueChange={(value) => handleInputChange("country", value)}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger
-                    className={`pl-10 ${validationErrors.country ? "border-destructive" : ""}`}
-                  >
-                    <SelectValue placeholder="Selecciona tu país" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {countries.map((country) => (
-                      <SelectItem key={country} value={country}>
-                        {country}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              {validationErrors.country && (
-                <p className="text-sm text-destructive">
-                  {validationErrors.country}
                 </p>
               )}
             </div>
